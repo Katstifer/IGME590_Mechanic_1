@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://k2xcvwhs5c8q"]
+
+[ext_resource type="PackedScene" uid="uid://c5l54b1dqtaen" path="res://scenes/inventoryUI.tscn" id="1_o5qli"]
+
+[node name="main" type="Node2D" unique_id=1143999047]
+
+[node name="inventoryUI" parent="." unique_id=552610218 instance=ExtResource("1_o5qli")]

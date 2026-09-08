@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://c5l54b1dqtaen"]
+
+[ext_resource type="Script" uid="uid://76j4xxwvqywr" path="res://scenes/inventoryGrid.gd" id="2_xnuj3"]
+[ext_resource type="PackedScene" uid="uid://3wn20w5y2yb8" path="res://scenes/inventorySlot.tscn" id="3_w76af"]
+
+[node name="main" type="Control" unique_id=552610218]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1088.0
+offset_bottom = -584.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+metadata/_edit_group_ = true
+
+[node name="inventoryUI_Container" type="PanelContainer" parent="." unique_id=317060422]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 64.0
+
+[node name="inventoryUI_Grid" type="GridContainer" parent="inventoryUI_Container" unique_id=832715770]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+script = ExtResource("2_xnuj3")
+slotSize = 80
+slotBorderWidth = 4
+width = 12
+height = 4
+slotPrefab = ExtResource("3_w76af")

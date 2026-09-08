@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://x5ubkr757x1m"]
+
+[ext_resource type="Script" uid="uid://ubywil241u5u" path="res://gridInventory.gd" id="1_nxo5g"]
+
+[node name="grid" type="Node2D" unique_id=248921249]
+script = ExtResource("1_nxo5g")
+
+[node name="grid_Container" type="GridContainer" parent="." unique_id=1699829714]
+offset_right = 40.0
+offset_bottom = 40.0
