@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://c5l54b1dqtaen"]
 
-[ext_resource type="Script" uid="uid://76j4xxwvqywr" path="res://scenes/inventoryGrid.gd" id="2_xnuj3"]
+[ext_resource type="Script" uid="uid://76j4xxwvqywr" path="res://scripts/inventoryGrid.gd" id="2_xnuj3"]
+[ext_resource type="PackedScene" uid="uid://dt8qvx15cctio" path="res://scenes/inventoryItem_template.tscn" id="3_7tsa3"]
 [ext_resource type="PackedScene" uid="uid://3wn20w5y2yb8" path="res://scenes/inventorySlot.tscn" id="3_w76af"]
 
 [node name="main" type="Control" unique_id=552610218]
@@ -14,7 +15,6 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-metadata/_edit_group_ = true
 
 [node name="inventoryUI_Container" type="PanelContainer" parent="." unique_id=317060422]
 layout_mode = 0
@@ -25,8 +25,19 @@ offset_bottom = 64.0
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 script = ExtResource("2_xnuj3")
-slotSize = 80
+slotSize = 64
 slotBorderWidth = 4
 width = 12
 height = 4
+inventoryItemPrefabs = Array[PackedScene]([ExtResource("3_7tsa3")])
 slotPrefab = ExtResource("3_w76af")
+
+[node name="spawnButton" type="Button" parent="." unique_id=1308939927]
+layout_mode = 0
+offset_left = 399.0
+offset_top = 519.0
+offset_right = 740.0
+offset_bottom = 614.0
+text = "Spawn Inventory Item"
+
+[connection signal="pressed" from="spawnButton" to="inventoryUI_Container/inventoryUI_Grid" method="onSpawnButtonPress"]

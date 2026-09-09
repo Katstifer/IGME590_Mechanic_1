@@ -1,16 +1,16 @@
 [gd_scene format=3 uid="uid://3wn20w5y2yb8"]
 
-[ext_resource type="Script" uid="uid://g4mewdjg7lam" path="res://scenes/inventorySlot.gd" id="1_0ynsv"]
+[ext_resource type="Script" uid="uid://g4mewdjg7lam" path="res://scripts/inventorySlot.gd" id="1_0ynsv"]
 
 [node name="inventorySlot" type="ColorRect" unique_id=1332402700]
 custom_minimum_size = Vector2(32, 32)
 custom_maximum_size = Vector2(128, 128)
 offset_right = 32.0
 offset_bottom = 32.0
-color = Color(0.6334554, 0.042597838, 0.682595, 1)
 script = ExtResource("1_0ynsv")
 
 [node name="inventorySlot_InnerRect" type="ColorRect" parent="." unique_id=1256802823]
+visible = false
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 0
 offset_left = 1.0
