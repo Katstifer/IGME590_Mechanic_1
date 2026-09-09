@@ -11,8 +11,14 @@ extends GridContainer
 @export var horSeparation: int = 0; 
 
 @export var slotData: Array[Node] = []; 
+
 @export var currentSlot: Node; 
+var previousSlot: Node; 
+
 @export var currentHeldItem: Node = null; 
+
+var alreadyHighlighted = false; 
+var highlightedSlots: = [];
 
 @export var inventoryItemPrefabs: Array[PackedScene] = [];
 
@@ -31,9 +37,32 @@ func _process(delta: float) -> void:
 		if (currentSlot != null):
 			currentSlot = null
 	if (currentHeldItem != null && currentSlot != null):
+		#If an item is being held and it is being hovered over a grid
+		if (currentSlot != previousSlot):
+		#If a new slot is being hovered over
+			var newSlots = getPotentialSpace(currentSlot, currentHeldItem);
+			if highlightedSlots != null && highlightedSlots.size() > 0:
+				#Check if highlighted slots exists
+				var resultsToUnhighlight = highlightedSlots.filter(
+					func(slot): return not newSlots.has(slot)
+				)
+				unhighlightSlots(resultsToUnhighlight);
+
+			print("Highlighting grid!"); 
+			highlightedSlots = newSlots; 
+			
+			var highlightColor; 
+			
+			if (checkForFit(currentHeldItem.itemGrid, highlightedSlots)):
+				highlightColor = GlobalEnums.SlotState.EMPTY;
+			else:
+				highlightColor = GlobalEnums.SlotState.TAKEN; 
+				
+			highlightSlots(highlightedSlots, highlightColor);
+			previousSlot = currentSlot; 
+				
 		if Input.is_action_just_pressed("LMB"):
-			print("Will attempt to place item!")
-			attemptItemPlace(currentSlot, currentHeldItem);
+				print("Will attempt to place item!")
 	
 # Setup inventory by filling the grid container with slots
 func setupInventory(): 
@@ -41,7 +70,6 @@ func setupInventory():
 	for y in height:
 		for x in width:
 			createSlot(); 
-			#print("Created inventory slot at " + str(x) + ", " + str(y));
 
 func createSlot(): 
 	var inventorySlot = slotPrefab.instantiate();
@@ -63,20 +91,24 @@ func createEmptySlotData():
 	
 # Called whenever the mouse enters the area of a slot. 
 func onSlotMouseEnter(slot: Node):
+	previousSlot = currentSlot; 
 	currentSlot = slot; 
-	var slotVector = getSlotCoords(slot);
-	var slotRef = getSlotFromCoords(slotVector.y, slotVector.x);
-	currentSlot.updateSlotColor(GlobalEnums.SlotState.EMPTY);
+	print("Previous Slot: " + str(previousSlot));
+	print("Current Slot: " + str(currentSlot));
+	
+	#var slotVector = getSlotCoords(slot);
+	#var slotRef = getSlotFromCoords(slotVector.y, slotVector.x);
+	#currentSlot.updateSlotColor(GlobalEnums.SlotState.EMPTY);
 
 # Called whenever the mouse leaves the area of a slot
 func onSlotMouseExit(slot: Node):
 	#print("On mouse exit in InventoryGrid")
-	slot.updateSlotColor(GlobalEnums.SlotState.DEFAULT);
+	#slot.updateSlotColor(GlobalEnums.SlotState.DEFAULT);
+	pass;
 	
 #Gets the X and Y coords (representing column, and row)
 #from a slot node
 func getSlotCoords(slot: Node):
-	print(slot);
 	var index = slotData.find(slot);
 	if (index == -1):
 		print("Slot not found.")
@@ -86,64 +118,20 @@ func getSlotCoords(slot: Node):
 
 		return Vector2(int(column), int(row));
 	
-#Checks whether an item can be placed in a specified area. 
-func checkForFit(itemShape: Array[Array]): 
-	#print("Check for fit itemShape: ");
-	#print(itemShape);
-	
-	var startCoord = getSlotCoords(currentSlot);
-	#How many columns/how long along X item is
-	var shapeWidth = itemShape[0].size();
-	#How many rows/how long along Y item is
-	var shapeHeight = itemShape.size(); 
-	
-	#print("ShapeWidth: " + str(shapeWidth));
-	#print("ShapeHeight: " + str(shapeHeight));
-	#print("X and Width: " + str(startCoord.x + shapeWidth))
-	#print("Y and Height: " + str(startCoord.y + shapeHeight))
-	
-	for y in range(startCoord.y, startCoord.y + shapeHeight):
-		if (startCoord.y + y) > height: 
-			return; 
-		for x in range(startCoord.x, startCoord.x + shapeWidth):
-			if (startCoord.x + x) > width: 
-				return; 
-			var checkSlot = getSlotFromCoords(y, x);
-			checkSlot.updateSlotColor(GlobalEnums.SlotState.TAKEN)
-"""
-	#Loop through slots grid and see if slots the specified
-	#distance away from the start contain an object
-	for y in range(startCoord.y, startCoord.y + shapeHeight):
-		if (startCoord.y + shapeHeight) > height:
-			print("Item is not fully in the grid.")
-			return false; 
-		else :
-			for x in range(startCoord.x, startCoord.x + shapeWidth):
-				if (startCoord.x + shapeHeight) > height:
-					print("Item is not fully in the grid.")
-					return false; 
-				else : 
-					var relativeItemTile = itemShape[y - startCoord.y][x - startCoord.x];
-					#If this part of the item grid doesn't have anything any it,
-					#we can skip collision checks. 
-					if (relativeItemTile == 0):
-						pass; 
-					else :
-						#If the slot that is being checked whether we can
-						#slot the item onto has something in it, return that
-						#we cannot fit it
-						var checkSlot = getSlotFromCoords(y, x);
-						if (checkSlot.hasItem()):
-							return false; 
-	"""
 #Gets a reference to an inventory slot using its row and column
 func getSlotFromCoords(row: int, column: int):
+	if (row < 0 || row >= height):
+		return null; 
+		
+	if (column < 0 || column >= width):
+		return null; 
+		
 	var index = getIndexFromCoords(row, column);
-	if (index < slotData.size()):
-		var slot = slotData[index];
-		return slot; 
-	else : 
-		return null;
+	
+	if (index >= 0 && index < slotData.size()):
+		return slotData[index];
+		
+	return null;
 
 #Gets the index of an inventory slot using its row and column
 func getIndexFromCoords(row: int, column: int):
@@ -156,7 +144,7 @@ func getIndexFromCoords(row: int, column: int):
 #It will attempt to place an item using the top left-most
 #tile in the item's structure. 
 func placeItem(item: Node, slot: Node):
-	if (checkForFit(item.itemGrid) == true):
+	if (true):
 		#Place item logic here
 		var itemShape = item.itemGrid; 
 		var startCoord = getSlotCoords(slot);
@@ -199,7 +187,8 @@ func onAttemptPickup(slot: Node):
 		pass;
 
 func attemptItemPlace(slot: Node, item: Node):
-	getPotentialSpace(slot, item);
+	var spaces = getPotentialSpace(slot, item);
+	highlightSlots(spaces, GlobalEnums.SlotState.EMPTY);
 	
 #Spawns a new item in from the prefabs list (NOT IMPLEMENTED YET)
 func onSpawnButtonPress() -> void:
@@ -210,33 +199,73 @@ func onSpawnButtonPress() -> void:
 	newItem.isSelected = true; 
 	currentHeldItem = newItem; 
 
+#Gets the potential spaces on the grid that an item will occupy
 func getPotentialSpace(slot: Node, item: Node):
 	var itemShape = item.itemGrid; 
 	var startCoord = getSlotCoords(currentSlot);
+	if startCoord == null:
+		return [];
 	#How many columns/how long along X item is
 	var shapeWidth = itemShape[0].size();
 	#How many rows/how long along Y item is
 	var shapeHeight = itemShape.size(); 
-	
 	var slotList = [];
-	
-	print("ShapeWidth: " + str(shapeWidth));
-	print("ShapeHeight: " + str(shapeHeight));
-	print("Start Coords: " + str(startCoord.x) + ", " + str(startCoord.y))
-	print("X and Width: " + str(startCoord.x + shapeWidth))
-	print("Y and Height: " + str(startCoord.y + shapeHeight))
-	
-	for y in range(startCoord.y, startCoord.y + shapeHeight):
-		if (y) > height: 
-			return; 
-		for x in range(startCoord.x, startCoord.x + shapeWidth):
-			print("X: " + str(x));
-			print("Start Coord: " + str(startCoord.x));
-			if (x) > width: 
-				return; 
-			var checkSlot = getSlotFromCoords(y, x);
-			var relativeItemTile = itemShape[y - startCoord.y][x - startCoord.x];
-			slotList.append(checkSlot)
 
-	for slotInstance in slotList:
-		slotInstance.updateSlotColor(GlobalEnums.SlotState.TAKEN)
+	for y in range(startCoord.y, startCoord.y + shapeHeight):
+		for x in range(startCoord.x, startCoord.x + shapeWidth):
+			
+			var itemTile = itemShape[y - startCoord.y][x - startCoord.x];
+			if (itemTile != 1):
+				continue;
+				
+			if (y >= height || y < 0):
+				continue;
+				
+			if (x >= width || x < 0):
+				continue;		
+					
+			var checkSlot = getSlotFromCoords(y, x);
+			if (checkSlot != null):
+				slotList.append(checkSlot);
+	return slotList; 
+
+# Checks if the shape is able to fit in the slots on the
+# grid it would go into. Returns true if it can fit, false if not
+func checkForFit(itemShape: Array, potentialSlots: Array):
+	# If the itemshape and potentialslots exist/have content
+	if (itemShape == null 
+	|| itemShape.size() == 0 
+	|| potentialSlots == null 
+	|| potentialSlots.size() == 0) : 
+		print("Item does not fit");
+		return false; 
+	else:		
+		var itemShapeSum = 0; 
+		
+		for y in itemShape.size():
+			for x in itemShape[y].size(): 
+				if (itemShape[y][x] == 1):
+					itemShapeSum += 1; 
+		
+		if (itemShapeSum != potentialSlots.size()):
+			return false; 
+			
+		# Check if all of thse slots that the object
+		# would go into are empty. If they are, return true.
+		for slot in potentialSlots: 
+			if slot.containedItem != null: 
+				print("Slot contains item");
+				return false; 
+		return true
+
+	
+#Returns highlighted slots to their original color
+func unhighlightSlots(slots): 
+	for slot in slots: 
+		slot.updateSlotColor(GlobalEnums.SlotState.DEFAULT) 
+	
+func highlightSlots(slots, slotState: GlobalEnums.SlotState):
+	if slots == null || slots.size() <0:
+		return; 
+	for slot in slots: 
+		slot.updateSlotColor(slotState);
