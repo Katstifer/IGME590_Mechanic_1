@@ -34,7 +34,7 @@ func _process(delta: float) -> void:
 		if Input.is_action_pressed("LMB"):
 			if containedItem != null:
 				if containedItem.isSelected == false:
-					print("Sending attempt pickup...");
+					#print("Sending attempt pickup...");
 					emit_signal("attemptItemPickup", self)
 					pass;
 	# Once the mouse leaves, fire the exit signal
@@ -58,7 +58,6 @@ func setSize(size, borderWidth):
 func updateSlotColor(state: GlobalEnums.SlotState): 
 	match state: 
 		GlobalEnums.SlotState.DEFAULT: 
-			print("Setting color to default.")
 			self.color = Color(Color.DIM_GRAY, 0.2);
 		GlobalEnums.SlotState.EMPTY: 
 			self.color = Color(Color.GREEN, 0.2);
