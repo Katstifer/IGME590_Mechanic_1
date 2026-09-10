@@ -1,9 +1,11 @@
 class_name InventorySlot
-extends ColorRect
+extends CenterContainer
 
 const GlobalEnums = preload("res://scripts/globalEnums.gd");
 
-@onready var innerRect: ColorRect = $inventorySlot_InnerRect; 
+@onready var mainRect: ColorRect = $inventorySlot_Rect;
+@onready var innerRect: ColorRect = $inventorySlot_Rect/inventorySlot_InnerRect; 
+
 
 var rectSize: int;
 var borderWidth: int;
@@ -45,6 +47,7 @@ func _process(delta: float) -> void:
 	
 func setSize(size, borderWidth):
 	custom_minimum_size = Vector2(size, size);
+	mainRect.custom_minimum_size = Vector2(size, size);
 	
 	var innerRectSize = size - (2 * borderWidth); 
 	innerRect.custom_minimum_size = Vector2(innerRectSize, innerRectSize);
@@ -57,13 +60,13 @@ func setSize(size, borderWidth):
 func updateSlotColor(state: GlobalEnums.SlotState): 
 	match state: 
 		GlobalEnums.SlotState.DEFAULT: 
-			self.color = Color(Color.DIM_GRAY, 0.2);
+			mainRect.color = Color(Color.DIM_GRAY, 0.2);
 		GlobalEnums.SlotState.EMPTY: 
-			self.color = Color(Color.GREEN, 0.2);
+			mainRect.color = Color(Color.GREEN, 0.2);
 		GlobalEnums.SlotState.TAKEN: 
-			self.color = Color(Color.RED, 0.2);
+			mainRect.color = Color(Color.RED, 0.2);
 		GlobalEnums.SlotState.HOVERED: 
-			self.color = Color(Color.YELLOW, 0.2);
+			mainRect.color = Color(Color.YELLOW, 0.2);
 		
 func addItem(item: Node):
 	containedItem = item; 
@@ -72,4 +75,3 @@ func addItem(item: Node):
 func removeItem():
 	containedItem = null; 
 	print("Item cleared from slot!");
-	

@@ -2,9 +2,11 @@ class_name InventoryItem
 extends Control
 
 
+@onready var inventorySprite : Node = $inventoryItem_Sprite; 
+
 #Max width and height of the space an item takes up
-@export var height: int; 
-@export var width: int; 
+var height: int; 
+var width: int; 
 
 var slotSize: int = 32; 
 var lerpSpeed: int = 20; 
@@ -16,7 +18,7 @@ var lerpSpeed: int = 20;
 @export var zeroOffset: Vector2; 
 
 #Angle item is rotated to
-@export var angle: int; 
+@export var angle: int = 0; 
 
 #Whether the item has been selected and is moving with the mouse
 @export var isSelected : bool = false; 
@@ -47,6 +49,18 @@ func initItemGrid():
 	print("Init item grid");
 	# If an item grid does not have a specified size
 	# simply make a rectangle with the given dimensions
+	if (height == 0 || height == null):
+		if itemGrid.size() > 0 && itemGrid != null: 
+			height = itemGrid.size(); 
+		else:
+			height = 2; 
+			
+	if (width == 0 || width == null):
+		if (itemGrid[0].size() > 0 && itemGrid != null):
+			width = itemGrid[0].size(); 
+		else: 
+			width = 2; 
+	
 	if itemGrid.size() <= 0 || itemGrid == null:
 		itemGrid = []; 
 		itemGrid.resize(height);
@@ -59,31 +73,17 @@ func initItemGrid():
 		anchor = Vector2i(0, 0);
 		
 func findZeroOffset(): 
-	print("Find zero offset");
-	print("Slot size: " + str(slotSize));
-	#For every row in the 
-	var offsetX = 0;
-	var offsetY = 0;
+	var anchorX = 0; 
+	var anchorY = 0; 
 	
-	for y in anchor.y + 1: 
-		print("Y" + str(y));
-		if y == anchor.y: 
-			offsetY += (slotSize / 2);
-		else : 
-			offsetY += slotSize; 
-		print("Updated Y: " + str(offsetY));
+	var centerPoint = inventorySprite.position; 
 
-	for x in anchor.x + 1: 
-			print("x" + str(x));
-			if x == anchor.x: 
-				offsetX += (slotSize / 2);
-			else : 
-				offsetX += slotSize; 
-			print("Updated X: " + str(offsetX));
-			
-	print("Out of Loop: " + str(offsetX) + ", " + str(offsetY));
-	var offset = Vector2(offsetX, offsetY);
-	return offset; 
+	var anchorOffset = Vector2(
+	(anchor.x + 0.5) * slotSize - width * slotSize / 2.0,
+	(anchor.y + 0.5) * slotSize - height * slotSize / 2.0
+	)
+
+	return anchorOffset; 
 	
 # Picks up the item and attaches it to mouse
 func pickUpItem():
@@ -106,6 +106,7 @@ func moveToPrevious():
 	
 #Rotates an item 90 degrees counter clockwise
 func rotateItem():
+	print("Rotating item");
 	angle += (90);
 
 		#Resets angle to standard
@@ -113,19 +114,21 @@ func rotateItem():
 		angle = 270; 
 	if (angle >= 360):
 		angle = 0;
-	
-	var newMatrix = [];
+
+	var newMatrix: Array[Array] = [];
 	newMatrix.resize(width);
+	
 	for i in newMatrix.size(): 
 		newMatrix[i].resize(height);
-	
+		newMatrix[i].fill(0);
+
 	var newHeight = width; 
 	var newWidth = height; 
 	
 	for y in newMatrix.size(): 
 		for x in newMatrix[0].size(): 
-			newMatrix[x][y] = itemGrid[y][x];
-	
+			newMatrix[y][x] = itemGrid[x][y];
+			
 	for y in newMatrix.size(): 
 		newMatrix[y].reverse();
 
@@ -134,13 +137,27 @@ func rotateItem():
 	
 	rotateSprite(); 
 	itemGrid = newMatrix; 
+	
+	var newAnchor : Vector2i = Vector2i(anchor.y, anchor.x);
+	anchor = newAnchor;
+	
+	zeroOffset = findZeroOffset(); 
+	
 
 func rotateSprite():
-	
-	pass; 
+	if (inventorySprite == null):
+		return; 
+	inventorySprite.rotation_degrees = angle; 
+
 #Lerps the item to a specified position. It moves the top-left of the item
 #to the target position, which should be at the top-left of where you want the item to be
 func lerpToPosition(delta): 
+	#
+	#print("TargetPos (AnchorSlot Center): " + str(targetPosition));
+	#print("TargetPos (AnchorSlot w/ Offset): " + str(targetPosition + zeroOffset));
+	#print("Zero Offset: " + str(zeroOffset));
+	#print("GlobalPos: " + str(get_global_position()));
+	
 	global_position = lerp(targetPosition - zeroOffset, get_global_position(), lerpSpeed * delta);
 	if (get_global_position() == (targetPosition - zeroOffset)):
 		isMovingToGrid = false; 

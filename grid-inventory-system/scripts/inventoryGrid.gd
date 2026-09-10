@@ -65,6 +65,7 @@ func _process(delta: float) -> void:
 				
 		if Input.is_action_just_pressed("LMB"):
 			attemptItemPlace(currentSlot, currentHeldItem);
+			
 	elif (currentSlot != null):
 		if (currentSlot != previousSlot):
 			var newSlots = []; 
@@ -73,6 +74,20 @@ func _process(delta: float) -> void:
 				unhighlightSlots(highlightedSlots);
 				highlightedSlots = newSlots; 
 			highlightSlots(highlightedSlots, GlobalEnums.SlotState.HOVERED);
+			
+	if (currentHeldItem != null):
+		if Input.is_action_just_pressed("Rotate"):
+			currentHeldItem.rotateItem(); 
+			var newSlots = getPotentialSpace(currentSlot, currentHeldItem);
+			if (highlightedSlots != null && highlightedSlots.size() > 0):
+				var resultsToUnhighlight = highlightedSlots.filter(
+					func(slot): return not newSlots.has(slot)
+				)
+				unhighlightSlots(resultsToUnhighlight);
+
+			print("Rotating highlights on grid!"); 
+			highlightedSlots = newSlots; 
+			
 	
 # Setup inventory by filling the grid container with slots
 func setupInventory(): 
@@ -158,6 +173,8 @@ func placeItem(item: Node, anchorSlot: Node, fitSlots : Array):
 		s.addItem(item);
 	if (anchorSlot != null):
 		print("Anchor Slot Index: " + str(getSlotCoords(anchorSlot)));
+		print("Anchor Slot Location: " + str(anchorSlot.get_global_position()));
+
 		item.placeItem(anchorSlot);
 	currentHeldItem = null; 
 
@@ -282,3 +299,6 @@ func highlightSlots(slots, slotState: GlobalEnums.SlotState):
 		return; 
 	for slot in slots: 
 		slot.updateSlotColor(slotState);
+
+func updateSlotHighlights(): 
+	pass;
