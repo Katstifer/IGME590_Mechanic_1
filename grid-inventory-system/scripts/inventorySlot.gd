@@ -3,7 +3,6 @@ extends ColorRect
 
 const GlobalEnums = preload("res://scripts/globalEnums.gd");
 
-
 @onready var innerRect: ColorRect = $inventorySlot_InnerRect; 
 
 var rectSize: int;
@@ -22,7 +21,7 @@ signal attemptItemPickup(slot: Node)
 func _ready() -> void:	
 	setSize(rectSize, borderWidth);
 	currentState = GlobalEnums.SlotState.DEFAULT; 
-	updateSlotColor(currentState);
+	updateSlotColor(GlobalEnums.SlotState.DEFAULT);
 
 func _process(delta: float) -> void:
 	# If the mouse is hovering over the slot, send out the
@@ -31,9 +30,9 @@ func _process(delta: float) -> void:
 		if mouseHovering == false: 
 			mouseHovering = true; 
 			emit_signal("mouseEnteredSlot", self)
-		if Input.is_action_pressed("LMB"):
+		if Input.is_action_just_pressed("LMB"):
 			if containedItem != null:
-				if containedItem.isSelected == false:
+				if containedItem.isSelected == false && containedItem.isMovingToGrid == false:
 					#print("Sending attempt pickup...");
 					emit_signal("attemptItemPickup", self)
 					pass;
@@ -63,6 +62,8 @@ func updateSlotColor(state: GlobalEnums.SlotState):
 			self.color = Color(Color.GREEN, 0.2);
 		GlobalEnums.SlotState.TAKEN: 
 			self.color = Color(Color.RED, 0.2);
+		GlobalEnums.SlotState.HOVERED: 
+			self.color = Color(Color.YELLOW, 0.2);
 		
 func addItem(item: Node):
 	containedItem = item; 

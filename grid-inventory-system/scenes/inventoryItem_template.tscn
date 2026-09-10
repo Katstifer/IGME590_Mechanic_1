@@ -12,6 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_na613")
 itemGrid = Array[Array]([[1, 1, 1], [0, 1, 0]])
+anchor = Vector2i(1, 0)
 
 [node name="inventoryItem_Sprite" type="Sprite2D" parent="." unique_id=476657842]
 texture = ExtResource("2_owaes")

@@ -36,6 +36,8 @@ func _process(delta: float) -> void:
 	if (!get_global_rect().has_point((get_global_mouse_position()))):
 		if (currentSlot != null):
 			currentSlot = null
+		if (highlightedSlots.size() && highlightedSlots != null):
+			unhighlightSlots(highlightedSlots);
 	if (currentHeldItem != null && currentSlot != null):
 		#If an item is being held and it is being hovered over a grid
 		if (currentSlot != previousSlot):
@@ -62,7 +64,15 @@ func _process(delta: float) -> void:
 			previousSlot = currentSlot; 
 				
 		if Input.is_action_just_pressed("LMB"):
-				print("Will attempt to place item!")
+			attemptItemPlace(currentSlot, currentHeldItem);
+	elif (currentSlot != null):
+		if (currentSlot != previousSlot):
+			var newSlots = []; 
+			newSlots.append(currentSlot);
+			if (highlightedSlots != null && highlightedSlots.size() > 0):
+				unhighlightSlots(highlightedSlots);
+				highlightedSlots = newSlots; 
+			highlightSlots(highlightedSlots, GlobalEnums.SlotState.HOVERED);
 	
 # Setup inventory by filling the grid container with slots
 func setupInventory(): 
@@ -116,7 +126,7 @@ func getSlotCoords(slot: Node):
 		var row = index / width
 		var column = index % width
 
-		return Vector2(int(column), int(row));
+		return Vector2i(column, row);
 	
 #Gets a reference to an inventory slot using its row and column
 func getSlotFromCoords(row: int, column: int):
@@ -143,42 +153,13 @@ func getIndexFromCoords(row: int, column: int):
 #Attempts to place an item at a specified slot
 #It will attempt to place an item using the top left-most
 #tile in the item's structure. 
-func placeItem(item: Node, slot: Node):
-	if (true):
-		#Place item logic here
-		var itemShape = item.itemGrid; 
-		var startCoord = getSlotCoords(slot);
-		var shapeWidth = itemShape[0].size();
-		var shapeHeight = itemShape.size(); 
-		
-		#Removes the item from the previous slots it was in
-		clearItemFromSlots(item); 
-		
-		#Add a reference to the item to any slot that will contain it
-		for y in range(startCoord.y, startCoord.y + shapeHeight):
-			for x in range(startCoord.x, startCoord.x + shapeWidth):
-				var relativeItemTile = itemShape[y - startCoord.y][x - startCoord.x];
-				if (relativeItemTile == 1):
-					var updateSlot = getSlotFromCoords(y, x);
-					updateSlot.addItem(item);
-		
-		#Update item previous location
-		item.previousLocation = Vector2(startCoord.x, startCoord.y);
-		
-	else : 
-		print("Item cannot be placed here!");
-		pass; 
-
-#Clears out any references slots may have 
-func clearItemFromSlots(item: Node):
-	for i in slotData.size(): 
-		if slotData[i].containedItem == item : 
-			slotData[i].removeItem(); 
-		
-#"Drops" an item, putting it back where it was before 
-# it began being moved	
-func dropItem(item: Node):
-	pass;
+func placeItem(item: Node, anchorSlot: Node, fitSlots : Array):
+	for s in fitSlots: 
+		s.addItem(item);
+	if (anchorSlot != null):
+		print("Anchor Slot Index: " + str(getSlotCoords(anchorSlot)));
+		item.placeItem(anchorSlot);
+	currentHeldItem = null; 
 
 func onAttemptPickup(slot: Node):
 	if (currentHeldItem != null):
@@ -187,8 +168,10 @@ func onAttemptPickup(slot: Node):
 		pass;
 
 func attemptItemPlace(slot: Node, item: Node):
-	var spaces = getPotentialSpace(slot, item);
-	highlightSlots(spaces, GlobalEnums.SlotState.EMPTY);
+	var fitSpaces = getPotentialSpace(slot, item);
+	var allSpaces = getFullItemRect(slot, item);
+	if (checkForFit(item.itemGrid, fitSpaces)):
+		placeItem(item, slot, fitSpaces);
 	
 #Spawns a new item in from the prefabs list (NOT IMPLEMENTED YET)
 func onSpawnButtonPress() -> void:
@@ -202,7 +185,11 @@ func onSpawnButtonPress() -> void:
 #Gets the potential spaces on the grid that an item will occupy
 func getPotentialSpace(slot: Node, item: Node):
 	var itemShape = item.itemGrid; 
-	var startCoord = getSlotCoords(currentSlot);
+	var mouseCoord = getSlotCoords(slot)
+	print("Anchor: " + str(item.anchor));
+	print("Mouse: " + str(mouseCoord));
+	var startCoord = mouseCoord - item.anchor
+	print("Start: " + str(startCoord));
 	if startCoord == null:
 		return [];
 	#How many columns/how long along X item is
@@ -229,6 +216,33 @@ func getPotentialSpace(slot: Node, item: Node):
 				slotList.append(checkSlot);
 	return slotList; 
 
+#Gets the full rectangle (border box of space item will occupy) for rendering purposes
+func getFullItemRect(slot: Node, item: Node):
+	var itemShape = item.itemGrid; 
+	var mouseCoord = getSlotCoords(slot)
+	var startCoord = mouseCoord - item.anchor
+	if startCoord == null:
+		return [];
+	#How many columns/how long along X item is
+	var shapeWidth = itemShape[0].size();
+	#How many rows/how long along Y item is
+	var shapeHeight = itemShape.size(); 
+	var slotList = [];
+	
+	for y in range(startCoord.y, startCoord.y + shapeHeight):
+		for x in range(startCoord.x, startCoord.x + shapeWidth):
+			
+			if (y >= height || y < 0):
+				continue;
+				
+			if (x >= width || x < 0):
+				continue;		
+					
+			var checkSlot = getSlotFromCoords(y, x);
+			if (checkSlot != null):
+				slotList.append(checkSlot);
+	return slotList;
+	
 # Checks if the shape is able to fit in the slots on the
 # grid it would go into. Returns true if it can fit, false if not
 func checkForFit(itemShape: Array, potentialSlots: Array):
@@ -258,7 +272,6 @@ func checkForFit(itemShape: Array, potentialSlots: Array):
 				return false; 
 		return true
 
-	
 #Returns highlighted slots to their original color
 func unhighlightSlots(slots): 
 	for slot in slots: 
