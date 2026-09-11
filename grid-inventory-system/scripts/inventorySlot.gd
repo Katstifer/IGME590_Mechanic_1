@@ -32,12 +32,7 @@ func _process(delta: float) -> void:
 		if mouseHovering == false: 
 			mouseHovering = true; 
 			emit_signal("mouseEnteredSlot", self)
-		if Input.is_action_just_pressed("LMB"):
-			if containedItem != null:
-				if containedItem.isSelected == false && containedItem.isMovingToGrid == false:
-					#print("Sending attempt pickup...");
-					emit_signal("attemptItemPickup", self)
-					pass;
+			
 	# Once the mouse leaves, fire the exit signal
 	else : 
 		if mouseHovering == true: 

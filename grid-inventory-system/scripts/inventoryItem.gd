@@ -27,18 +27,21 @@ var lerpSpeed: int = 20;
 
 #The slot this item is contained in (top-left, to keep track of location)
 var slotContainer = null; 
-	
-var previousPosition: Vector2; # Top-left-most location in grid
+var previousContainer = null; 
+ # Top-left-most location in grid
 var targetPosition: Vector2; # Top left-most location in grid
 
 func _ready() -> void:
+	print("New Item:", self.name, "  ", get_instance_id())
+
 	slotContainer = null;
-	isSelected = true; 
+	isSelected = false; 
+	isMovingToGrid = false; 
 	initItemGrid(); 
 	zeroOffset = findZeroOffset();
-	print("Item ready, offset: " + str(zeroOffset));
 	
 func _process(delta: float) -> void:
+	
 	if (isSelected) : 
 		global_position = lerp(get_global_position() - zeroOffset, get_global_mouse_position(), delta * lerpSpeed);
 		
@@ -87,22 +90,40 @@ func findZeroOffset():
 	
 # Picks up the item and attaches it to mouse
 func pickUpItem():
-	if !isSelected: 
-		isSelected = true;  
+	if isSelected:
+		return 
+		
+	print("Picking up item");
+	previousContainer = slotContainer; 
+	slotContainer = null; 
 	
+	isSelected = true;  
+	isMovingToGrid = false; 
+		
+"""
+func dropItem(): 
+	print("Dropping item: " + str(self) + " " + str(get_instance_id()));
+	isSelected = false; 
+	if (previousContainer != null):
+		placeItem(previousContainer);
+	else:
+		targetPosition = Vector2(0,0);
+		isMovingToGrid = true; 
+"""
+
 # Places item down on grid
 func placeItem(slot : Node): 
-	#slotContainer = slot; 
+	slotContainer = slot; 
+	previousContainer = null; 
+	
 	isSelected = false; 
+	
 	print("Anchor Slot Location: " + str(slot.get_global_position()));
-	var centerOfAnchorSlot = slot.get_global_position() + Vector2(slotSize, slotSize);
+	
+	var centerOfAnchorSlot = slotContainer.get_global_position() + Vector2(slotSize, slotSize);
+	
 	targetPosition = centerOfAnchorSlot - zeroOffset; 
 	isMovingToGrid = true; 
-
-func moveToPrevious(): 
-	targetPosition = previousPosition; 
-	isMovingToGrid = true; 
-	#Moves item back to previous position
 	
 #Rotates an item 90 degrees counter clockwise
 func rotateItem():
@@ -158,6 +179,8 @@ func lerpToPosition(delta):
 	#print("Zero Offset: " + str(zeroOffset));
 	#print("GlobalPos: " + str(get_global_position()));
 	
-	global_position = lerp(targetPosition - zeroOffset, get_global_position(), lerpSpeed * delta);
-	if (get_global_position() == (targetPosition - zeroOffset)):
+	global_position = lerp(get_global_position(), targetPosition - zeroOffset, lerpSpeed * delta);
+	
+	if ( Vector2i(get_global_position().round()) == Vector2i((targetPosition - zeroOffset).round()) ):
+		print("Reached target pos");
 		isMovingToGrid = false; 

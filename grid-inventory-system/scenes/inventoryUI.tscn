@@ -40,4 +40,9 @@ offset_right = 740.0
 offset_bottom = 614.0
 text = "Spawn Inventory Item"
 
+[node name="inventoryUI_ItemContainer" type="Control" parent="." unique_id=500589188]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
 [connection signal="pressed" from="spawnButton" to="inventoryUI_Container/inventoryUI_Grid" method="onSpawnButtonPress"]

@@ -18,13 +18,14 @@ var previousSlot: Node;
 @export var currentHeldItem: Node = null; 
 
 var alreadyHighlighted = false; 
-var highlightedSlots: = [];
+var highlightedSlots: Array = [];
 
 @export var inventoryItemPrefabs: Array[PackedScene] = [];
 
 const GlobalEnums = preload("res://scripts/globalEnums.gd");
 
 @export var slotPrefab: PackedScene; 
+@onready var itemContainer : Control = $"../../inventoryUI_ItemContainer"; 
 
 func _ready() -> void:
 	add_theme_constant_override("h_separation", horSeparation);
@@ -36,57 +37,40 @@ func _process(delta: float) -> void:
 	if (!get_global_rect().has_point((get_global_mouse_position()))):
 		if (currentSlot != null):
 			currentSlot = null
-		if (highlightedSlots.size() && highlightedSlots != null):
+		if (highlightedSlots.size() > 0 && highlightedSlots != null):
 			unhighlightSlots(highlightedSlots);
 	if (currentHeldItem != null && currentSlot != null):
 		#If an item is being held and it is being hovered over a grid
 		if (currentSlot != previousSlot):
 		#If a new slot is being hovered over
-			var newSlots = getPotentialSpace(currentSlot, currentHeldItem);
-			if highlightedSlots != null && highlightedSlots.size() > 0:
-				#Check if highlighted slots exists
-				var resultsToUnhighlight = highlightedSlots.filter(
-					func(slot): return not newSlots.has(slot)
-				)
-				unhighlightSlots(resultsToUnhighlight);
-
-			print("Highlighting grid!"); 
-			highlightedSlots = newSlots; 
-			
-			var highlightColor; 
-			
-			if (checkForFit(currentHeldItem.itemGrid, highlightedSlots)):
-				highlightColor = GlobalEnums.SlotState.EMPTY;
-			else:
-				highlightColor = GlobalEnums.SlotState.TAKEN; 
-				
-			highlightSlots(highlightedSlots, highlightColor);
+			handleSlotHighlights();
 			previousSlot = currentSlot; 
 				
-		if Input.is_action_just_pressed("LMB"):
+		if Input.is_action_just_pressed("Place"):
 			attemptItemPlace(currentSlot, currentHeldItem);
+		elif Input.is_action_just_pressed("SwapItem"):
+			print("Current Item Before: " + str(currentHeldItem));
+			swapItem(currentSlot);
+			print("Current Item After: " + str(currentHeldItem));
 			
 	elif (currentSlot != null):
 		if (currentSlot != previousSlot):
-			var newSlots = []; 
-			newSlots.append(currentSlot);
-			if (highlightedSlots != null && highlightedSlots.size() > 0):
-				unhighlightSlots(highlightedSlots);
-				highlightedSlots = newSlots; 
-			highlightSlots(highlightedSlots, GlobalEnums.SlotState.HOVERED);
+			handleSlotHighlights(); 
+		if Input.is_action_just_pressed("PickUp"):
+			print("Trying pickup...");
+			pickupItem(currentSlot);
 			
 	if (currentHeldItem != null):
 		if Input.is_action_just_pressed("Rotate"):
 			currentHeldItem.rotateItem(); 
-			var newSlots = getPotentialSpace(currentSlot, currentHeldItem);
-			if (highlightedSlots != null && highlightedSlots.size() > 0):
-				var resultsToUnhighlight = highlightedSlots.filter(
-					func(slot): return not newSlots.has(slot)
-				)
-				unhighlightSlots(resultsToUnhighlight);
+			handleSlotHighlights(); 
 
 			print("Rotating highlights on grid!"); 
-			highlightedSlots = newSlots; 
+			
+		if Input.is_action_just_pressed("DropItem"):
+			print("Try item drop");
+			dropItem(); 
+			handleSlotHighlights(); 
 			
 	
 # Setup inventory by filling the grid container with slots
@@ -103,7 +87,6 @@ func createSlot():
 	
 	inventorySlot.mouseEnteredSlot.connect(onSlotMouseEnter)
 	inventorySlot.mouseExitedSlot.connect(onSlotMouseExit)
-	inventorySlot.attemptItemPickup.connect(onAttemptPickup)
 			
 	add_child(inventorySlot);
 	slotData.append(inventorySlot);
@@ -118,12 +101,6 @@ func createEmptySlotData():
 func onSlotMouseEnter(slot: Node):
 	previousSlot = currentSlot; 
 	currentSlot = slot; 
-	print("Previous Slot: " + str(previousSlot));
-	print("Current Slot: " + str(currentSlot));
-	
-	#var slotVector = getSlotCoords(slot);
-	#var slotRef = getSlotFromCoords(slotVector.y, slotVector.x);
-	#currentSlot.updateSlotColor(GlobalEnums.SlotState.EMPTY);
 
 # Called whenever the mouse leaves the area of a slot
 func onSlotMouseExit(slot: Node):
@@ -169,33 +146,78 @@ func getIndexFromCoords(row: int, column: int):
 #It will attempt to place an item using the top left-most
 #tile in the item's structure. 
 func placeItem(item: Node, anchorSlot: Node, fitSlots : Array):
+	print("Placing item: " + str(currentHeldItem) + " " + str(currentHeldItem.get_instance_id()));
+	print("Fit Slots: " + str(fitSlots));
 	for s in fitSlots: 
 		s.addItem(item);
 	if (anchorSlot != null):
-		print("Anchor Slot Index: " + str(getSlotCoords(anchorSlot)));
-		print("Anchor Slot Location: " + str(anchorSlot.get_global_position()));
-
 		item.placeItem(anchorSlot);
 	currentHeldItem = null; 
 
-func onAttemptPickup(slot: Node):
-	if (currentHeldItem != null):
-		slot.containedItem.pickupItem(); 
-	else:
-		pass;
+func pickupItem(slot: Node):
+	if (slot.containedItem != null):
+		currentHeldItem = slot.containedItem;
+		currentHeldItem.pickUpItem(); 
+		
+		clearItemsTiles(currentHeldItem);
+				
+func clearItemsTiles(item : Node):
+		for s in slotData: 
+			if s.containedItem == item: 
+				print("Getting rid of held items");
+				s.removeItem();
+	
+func swapItem(slot: Node):
+	if (slot.containedItem == null):
+		print("Can't swap -- no item in slot");
+		return;
+	if (currentHeldItem == null):
+		return; 
+		
+	var swapItem = currentHeldItem; 
+	print("Item to Place: " + str(currentHeldItem));
+	pickupItem(currentSlot);
+	var newCurrentItem = currentHeldItem; 
+	print("Item to Hold: " + str(currentHeldItem));
+	
+	var fitSpaces = getPotentialSpace(currentSlot, swapItem);
+	if (checkForFit(swapItem.itemGrid, fitSpaces)):
+		print("Swap successful");
+		placeItem(swapItem, currentSlot, fitSpaces);
+		currentHeldItem = newCurrentItem; 
+		currentHeldItem.isSelected = true; 
+	else : 
+		print("Swap unsuccessful");
+		attemptItemPlace(currentSlot, currentHeldItem);
+		currentHeldItem = swapItem; 
+		currentHeldItem.isSelected = true; 
+		
+func dropItem():
+	if (currentHeldItem.previousContainer == null):
+		return; 
+	var targetSlot = currentHeldItem.previousContainer; 
+	attemptItemPlace(targetSlot, currentHeldItem);
 
 func attemptItemPlace(slot: Node, item: Node):
+	print("Item place?")
+	print("Attempt place item: " + str(item));
 	var fitSpaces = getPotentialSpace(slot, item);
-	var allSpaces = getFullItemRect(slot, item);
 	if (checkForFit(item.itemGrid, fitSpaces)):
 		placeItem(item, slot, fitSpaces);
+	else: 
+		print("Item: " + str(item) + " cannot fit");
+		print(str(fitSpaces));
 	
 #Spawns a new item in from the prefabs list (NOT IMPLEMENTED YET)
 func onSpawnButtonPress() -> void:
 	if (inventoryItemPrefabs.size() <= 0):
 		return; 
+	if (currentHeldItem != null): 
+		return; 
 	var newItem = inventoryItemPrefabs[0].instantiate(); 
-	self.get_parent().add_child(newItem);
+	
+	itemContainer.add_child(newItem);
+	
 	newItem.isSelected = true; 
 	currentHeldItem = newItem; 
 
@@ -300,5 +322,43 @@ func highlightSlots(slots, slotState: GlobalEnums.SlotState):
 	for slot in slots: 
 		slot.updateSlotColor(slotState);
 
-func updateSlotHighlights(): 
-	pass;
+#Highlights the appropriate slot based on the position of the mouse
+#and the state of held items, etc.
+func handleSlotHighlights():
+	var mouseOnGrid = get_global_rect().has_point((get_global_mouse_position()));
+	
+	if (mouseOnGrid): #IF MOUSE OVER INVENTORY
+		if (currentHeldItem != null && currentSlot != null): #HELD ITEM: -> Hovering with item or going to rotate
+			var newSlots = getPotentialSpace(currentSlot, currentHeldItem);
+			
+			if highlightedSlots != null && highlightedSlots.size() > 0:
+				var resultsToUnhighlight = highlightedSlots.filter(
+					func(slot): return not newSlots.has(slot))
+				unhighlightSlots(resultsToUnhighlight);
+				
+			highlightedSlots = newSlots; 
+			var highlightColor; 
+			
+			if (checkForFit(currentHeldItem.itemGrid, highlightedSlots)):
+				highlightColor = GlobalEnums.SlotState.EMPTY;
+			else:
+				highlightColor = GlobalEnums.SlotState.TAKEN; 
+				
+			highlightSlots(highlightedSlots, highlightColor);	
+			
+		else : #NO HELD ITEM: -> Item is just hovering
+			var newSlots = [];
+			newSlots.append(currentSlot);
+			if highlightedSlots != null && highlightedSlots.size() > 0:
+				#Check if highlighted slots exists
+				var resultsToUnhighlight = highlightedSlots.filter(
+					func(slot): return not newSlots.has(slot)
+				)
+				unhighlightSlots(resultsToUnhighlight);
+				highlightedSlots = newSlots; 
+				highlightSlots(highlightedSlots, GlobalEnums.SlotState.HOVERED);
+	else : #IF MOUSE OFF INVENTORY
+		#Unhighlight all slots.
+		if (highlightedSlots.size() > 0 && highlightedSlots != null):
+			unhighlightSlots(highlightedSlots);
+		
