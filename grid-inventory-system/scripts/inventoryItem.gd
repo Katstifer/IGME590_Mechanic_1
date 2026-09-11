@@ -100,16 +100,6 @@ func pickUpItem():
 	isSelected = true;  
 	isMovingToGrid = false; 
 		
-"""
-func dropItem(): 
-	print("Dropping item: " + str(self) + " " + str(get_instance_id()));
-	isSelected = false; 
-	if (previousContainer != null):
-		placeItem(previousContainer);
-	else:
-		targetPosition = Vector2(0,0);
-		isMovingToGrid = true; 
-"""
 
 # Places item down on grid
 func placeItem(slot : Node): 
@@ -118,7 +108,7 @@ func placeItem(slot : Node):
 	
 	isSelected = false; 
 	
-	print("Anchor Slot Location: " + str(slot.get_global_position()));
+	#print("Anchor Slot Location: " + str(slot.get_global_position()));
 	
 	var centerOfAnchorSlot = slotContainer.get_global_position() + Vector2(slotSize, slotSize);
 	
@@ -139,6 +129,11 @@ func rotateItem():
 	var newMatrix: Array[Array] = [];
 	newMatrix.resize(width);
 	
+	#Transforms the anchor
+	var anchorTransform = []; 
+	anchorTransform.resize(height);
+	var currentAnchorIndex = 0; 
+	
 	for i in newMatrix.size(): 
 		newMatrix[i].resize(height);
 		newMatrix[i].fill(0);
@@ -149,18 +144,23 @@ func rotateItem():
 	for y in newMatrix.size(): 
 		for x in newMatrix[0].size(): 
 			newMatrix[y][x] = itemGrid[x][y];
-			
+				
+			if (y == anchor.x):
+				if (x == anchor.y):
+					currentAnchorIndex = x; 
+				anchorTransform[x] = Vector2i(x, y);
+
 	for y in newMatrix.size(): 
 		newMatrix[y].reverse();
-
+	anchorTransform.reverse(); 
+	
 	width = newWidth; 
 	height = newHeight; 
 	
 	rotateSprite(); 
 	itemGrid = newMatrix; 
-	
-	var newAnchor : Vector2i = Vector2i(anchor.y, anchor.x);
-	anchor = newAnchor;
+
+	anchor = anchorTransform[currentAnchorIndex];
 	
 	zeroOffset = findZeroOffset(); 
 	
@@ -173,12 +173,6 @@ func rotateSprite():
 #Lerps the item to a specified position. It moves the top-left of the item
 #to the target position, which should be at the top-left of where you want the item to be
 func lerpToPosition(delta): 
-	#
-	#print("TargetPos (AnchorSlot Center): " + str(targetPosition));
-	#print("TargetPos (AnchorSlot w/ Offset): " + str(targetPosition + zeroOffset));
-	#print("Zero Offset: " + str(zeroOffset));
-	#print("GlobalPos: " + str(get_global_position()));
-	
 	global_position = lerp(get_global_position(), targetPosition - zeroOffset, lerpSpeed * delta);
 	
 	if ( Vector2i(get_global_position().round()) == Vector2i((targetPosition - zeroOffset).round()) ):

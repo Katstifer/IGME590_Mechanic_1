@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://dfd0chypuljd8"]
+
+[ext_resource type="Script" uid="uid://htt4no2r75wg" path="res://scripts/inventoryItem.gd" id="1_fh1lw"]
+[ext_resource type="Texture2D" uid="uid://ceupmfrr02prc" path="res://assets/2by1Placeholder.png" id="2_ben1r"]
+
+[node name="inventoryItem" type="Control" unique_id=855047511]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1152.0
+offset_bottom = -648.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_fh1lw")
+itemGrid = Array[Array]([[1, 1]])
+
+[node name="inventoryItem_Sprite" type="Sprite2D" parent="." unique_id=476657842]
+texture = ExtResource("2_ben1r")

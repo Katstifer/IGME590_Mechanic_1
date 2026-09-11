@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://b5g7c82va4yue"]
+
+[ext_resource type="Script" uid="uid://htt4no2r75wg" path="res://scripts/inventoryItem.gd" id="1_p5xei"]
+[ext_resource type="Texture2D" uid="uid://cnry5oc7qcq0r" path="res://assets/UBlockPlaceholder.png" id="2_p5xei"]
+
+[node name="inventoryItem" type="Control" unique_id=855047511]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1152.0
+offset_bottom = -648.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_p5xei")
+itemGrid = Array[Array]([[1, 1, 1], [1, 0, 1]])
+anchor = Vector2i(1, 0)
+
+[node name="inventoryItem_Sprite" type="Sprite2D" parent="." unique_id=476657842]
+texture = ExtResource("2_p5xei")

@@ -1,21 +1,21 @@
 class_name InventoryGrid
 extends GridContainer
 
-@export var slotSize: int = 32; 
-@export var slotBorderWidth: int = 2; 
+@export var slotSize: int = 64; 
+var slotBorderWidth: int = 2; 
 
 @export var width: int = 3; 
 @export var height: int = 3; 
 
-@export var vertSeparation: int = 0;
-@export var horSeparation: int = 0; 
+var vertSeparation: int = 0;
+var horSeparation: int = 0; 
 
-@export var slotData: Array[Node] = []; 
+var slotData: Array[Node] = []; 
 
-@export var currentSlot: Node; 
+var currentSlot: Node; 
 var previousSlot: Node; 
 
-@export var currentHeldItem: Node = null; 
+var currentHeldItem: Node = null; 
 
 var alreadyHighlighted = false; 
 var highlightedSlots: Array = [];
@@ -214,7 +214,10 @@ func onSpawnButtonPress() -> void:
 		return; 
 	if (currentHeldItem != null): 
 		return; 
-	var newItem = inventoryItemPrefabs[0].instantiate(); 
+		
+	var itemIndex = randi_range(0, inventoryItemPrefabs.size() - 1);
+	print("Index");
+	var newItem = inventoryItemPrefabs[itemIndex].instantiate(); 
 	
 	itemContainer.add_child(newItem);
 	
