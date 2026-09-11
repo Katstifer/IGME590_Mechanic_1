@@ -188,7 +188,7 @@ func swapItem(slot: Node):
 		currentHeldItem.isSelected = true; 
 	else : 
 		print("Swap unsuccessful");
-		attemptItemPlace(currentSlot, currentHeldItem);
+		attemptItemPlace(currentHeldItem.previousContainer, currentHeldItem);
 		currentHeldItem = swapItem; 
 		currentHeldItem.isSelected = true; 
 		
