@@ -15,10 +15,10 @@ var mouseHovering = false;
 
 var containedItem: Node = null; 
 
-signal mouseEnteredSlot(slot: Node)
-signal mouseExitedSlot(slot: Node)
+signal mouseEnteredSlot(slot: InventorySlot)
+signal mouseExitedSlot(slot: InventorySlot)
 
-signal attemptItemPickup(slot: Node)
+signal attemptItemPickup(slot: InventorySlot)
 
 func _ready() -> void:	
 	setSize(rectSize, borderWidth);
@@ -63,10 +63,8 @@ func updateSlotColor(state: GlobalEnums.SlotState):
 		GlobalEnums.SlotState.HOVERED: 
 			mainRect.color = Color(Color.YELLOW, 0.2);
 		
-func addItem(item: Node):
+func addItem(item: InventoryItem):
 	containedItem = item; 
-	print("New item: " + str(containedItem));
 	
 func removeItem():
 	containedItem = null; 
-	print("Item cleared from slot!");

@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://b5g7c82va4yue" path="res://scenes/itemPlaceholders/inventoryItem_placeholderU.tscn" id="8_yjs64"]
 [ext_resource type="PackedScene" uid="uid://iy8lrgi7oj0g" path="res://scenes/itemPlaceholders/inventoryItem_placeholderRightL.tscn" id="9_78ej7"]
 [ext_resource type="PackedScene" uid="uid://tlvoga8rr1wf" path="res://scenes/itemPlaceholders/inventoryItem_placeholderLeftL.tscn" id="10_mo0sc"]
+[ext_resource type="Script" uid="uid://b8dqs3a65hwx2" path="res://scenes/inventoryItemSpawnHandler.gd" id="12_s7i53"]
 
 [node name="inventory" type="Control" unique_id=552610218]
 layout_mode = 3
@@ -24,31 +25,36 @@ grow_vertical = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 
-[node name="inventoryUI_Container" type="PanelContainer" parent="." unique_id=317060422]
+[node name="inventoryGridContainer" type="CenterContainer" parent="." unique_id=1048313107]
 layout_mode = 0
-offset_right = 64.0
-offset_bottom = 64.0
+offset_right = 1152.0
+offset_bottom = 402.0
 
-[node name="inventoryUI_Grid" type="GridContainer" parent="inventoryUI_Container" unique_id=832715770]
+[node name="inventoryGrid" type="GridContainer" parent="inventoryGridContainer" unique_id=832715770 node_paths=PackedStringArray("itemContainer", "spawnHandler")]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 script = ExtResource("2_xnuj3")
-width = 12
-height = 8
+width = 16
+height = 6
 inventoryItemPrefabs = Array[PackedScene]([ExtResource("2_7tsa3"), ExtResource("8_yjs64"), ExtResource("4_dji2x"), ExtResource("5_llgub"), ExtResource("5_iph1u"), ExtResource("10_mo0sc"), ExtResource("6_s7i53"), ExtResource("9_78ej7"), ExtResource("7_itj25")])
 slotPrefab = ExtResource("3_w76af")
+itemContainer = NodePath("../../inventoryItemContainer")
+spawnHandler = NodePath("../../inventoryItemSpawner")
 
 [node name="spawnButton" type="Button" parent="." unique_id=1308939927]
 layout_mode = 0
-offset_left = 399.0
-offset_top = 519.0
-offset_right = 740.0
-offset_bottom = 614.0
+offset_left = 401.0
+offset_top = 517.0
+offset_right = 742.0
+offset_bottom = 612.0
 text = "Spawn Inventory Item"
 
-[node name="inventoryUI_ItemContainer" type="Control" parent="." unique_id=500589188]
+[node name="inventoryItemContainer" type="Control" parent="." unique_id=500589188]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[connection signal="pressed" from="spawnButton" to="inventoryUI_Container/inventoryUI_Grid" method="onSpawnButtonPress"]
+[node name="inventoryItemSpawner" type="Node" parent="." unique_id=1042184566]
+script = ExtResource("12_s7i53")
+
+[connection signal="pressed" from="spawnButton" to="inventoryGridContainer/inventoryGrid" method="onSpawnButtonPress"]

@@ -26,14 +26,12 @@ var lerpSpeed: int = 20;
 @export var isMovingToGrid : bool = false; 
 
 #The slot this item is contained in (top-left, to keep track of location)
-var slotContainer = null; 
-var previousContainer = null; 
+var slotContainer: InventorySlot = null; 
+var previousContainer: InventorySlot = null; 
  # Top-left-most location in grid
 var targetPosition: Vector2; # Top left-most location in grid
 
 func _ready() -> void:
-	print("New Item:", self.name, "  ", get_instance_id())
-
 	slotContainer = null;
 	isSelected = false; 
 	isMovingToGrid = false; 
@@ -49,7 +47,6 @@ func _process(delta: float) -> void:
 		lerpToPosition(delta);
 
 func initItemGrid():
-	print("Init item grid");
 	# If an item grid does not have a specified size
 	# simply make a rectangle with the given dimensions
 	if (height == 0 || height == null):
@@ -93,7 +90,6 @@ func pickUpItem():
 	if isSelected:
 		return 
 		
-	print("Picking up item");
 	previousContainer = slotContainer; 
 	slotContainer = null; 
 	
@@ -102,7 +98,7 @@ func pickUpItem():
 		
 
 # Places item down on grid
-func placeItem(slot : Node): 
+func placeItem(slot : InventorySlot): 
 	slotContainer = slot; 
 	previousContainer = null; 
 	
@@ -117,7 +113,6 @@ func placeItem(slot : Node):
 	
 #Rotates an item 90 degrees counter clockwise
 func rotateItem():
-	print("Rotating item");
 	angle += (90);
 
 		#Resets angle to standard
@@ -164,7 +159,6 @@ func rotateItem():
 	
 	zeroOffset = findZeroOffset(); 
 	
-
 func rotateSprite():
 	if (inventorySprite == null):
 		return; 
@@ -176,5 +170,4 @@ func lerpToPosition(delta):
 	global_position = lerp(get_global_position(), targetPosition - zeroOffset, lerpSpeed * delta);
 	
 	if ( Vector2i(get_global_position().round()) == Vector2i((targetPosition - zeroOffset).round()) ):
-		print("Reached target pos");
 		isMovingToGrid = false; 

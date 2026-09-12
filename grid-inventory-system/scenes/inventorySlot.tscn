@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://g4mewdjg7lam" path="res://scripts/inventorySlot.gd" id="1_0ynsv"]
 
 [node name="inventorySlot" type="CenterContainer" unique_id=1936996517]
-custom_minimum_size = Vector2(32, 32)
-custom_maximum_size = Vector2(128, 128)
+custom_minimum_size = Vector2(16, 16)
+custom_maximum_size = Vector2(1600, 1600)
 offset_right = 32.0
 offset_bottom = 32.0
 script = ExtResource("1_0ynsv")
