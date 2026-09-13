@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Grid Inventory System"
-run/main_scene="uid://c5l54b1dqtaen"
+run/main_scene="uid://b0frpb4vt1wq0"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 

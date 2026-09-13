@@ -7,9 +7,6 @@ var slotBorderWidth: int = 2;
 @export var width: int = 3; 
 @export var height: int = 3; 
 
-var vertSeparation: int = 0;
-var horSeparation: int = 0; 
-
 var slotData: Array[InventorySlot] = []; 
 
 var currentSlot: InventorySlot; 
@@ -20,21 +17,16 @@ var currentHeldItem: InventoryItem = null;
 var alreadyHighlighted = false; 
 var highlightedSlots: Array[InventorySlot] = [];
 
-@export var inventoryItemPrefabs: Array[PackedScene] = [];
-
 const GlobalEnums = preload("res://scripts/globalEnums.gd");
 
 @export var slotPrefab: PackedScene; 
 
-@export var itemContainer : Node; 
 @export var spawnHandler : Node; 
+@export var inputHandler : Node; 
 
 func _ready() -> void:
-	add_theme_constant_override("h_separation", horSeparation);
-	add_theme_constant_override("v_separation", vertSeparation);
-	
 	setupInventory(); 
-		
+	
 func _process(delta: float) -> void:
 	if (!get_global_rect().has_point((get_global_mouse_position()))):
 		if (currentSlot != null):
@@ -68,7 +60,6 @@ func _process(delta: float) -> void:
 			dropItem(); 
 			handleSlotHighlights(); 
 			
-	
 # Setup inventory by filling the grid container with slots
 func setupInventory(): 
 	self.columns = width; 
@@ -194,21 +185,6 @@ func attemptItemPlace(slot: InventorySlot, item: InventoryItem):
 		placeItem(item, slot, fitSpaces);
 	else: 
 		return; 
-	
-#Spawns a new item in from the prefabs list (NOT IMPLEMENTED YET)
-func onSpawnButtonPress() -> void:
-	if (inventoryItemPrefabs.size() <= 0):
-		return; 
-	if (currentHeldItem != null): 
-		return; 
-		
-	var itemIndex = randi_range(0, inventoryItemPrefabs.size() - 1);
-	var newItem = inventoryItemPrefabs[itemIndex].instantiate(); 
-	
-	itemContainer.add_child(newItem);
-	
-	newItem.isSelected = true; 
-	currentHeldItem = newItem; 
 
 #Gets the potential spaces on the grid that an item will occupy
 func getPotentialSpace(slot: InventorySlot, item: InventoryItem):
@@ -342,8 +318,8 @@ func handleSlotHighlights():
 					func(slot): return not newSlots.has(slot)
 				)
 				unhighlightSlots(resultsToUnhighlight);
-				highlightedSlots = newSlots; 
-				highlightSlots(highlightedSlots, GlobalEnums.SlotState.HOVERED);
+			highlightedSlots = newSlots; 
+			highlightSlots(highlightedSlots, GlobalEnums.SlotState.HOVERED);
 	else : #IF MOUSE OFF INVENTORY
 		#Unhighlight all slots.
 		if (highlightedSlots.size() > 0 && highlightedSlots != null):

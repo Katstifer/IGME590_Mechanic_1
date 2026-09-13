@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://b5e86y7a5adiv"]
+
+[ext_resource type="Script" uid="uid://76j4xxwvqywr" path="res://scripts/inventoryGrid.gd" id="1_bhjab"]
+[ext_resource type="PackedScene" uid="uid://3wn20w5y2yb8" path="res://scenes/inventorySlot.tscn" id="2_kipll"]
+
+[node name="inventoryGrid" type="GridContainer" unique_id=1645351382 node_paths=PackedStringArray("spawnHandler")]
+custom_minimum_size = Vector2(32, 32)
+script = ExtResource("1_bhjab")
+width = 16
+height = 6
+slotPrefab = ExtResource("2_kipll")
+spawnHandler = NodePath("")

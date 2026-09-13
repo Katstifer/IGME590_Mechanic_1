@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://bsyu0g6eb2h21"]
+
+[ext_resource type="Script" uid="uid://c2u662o61mty5" path="res://inventorySpawnGrid.gd" id="1_46sgt"]
+[ext_resource type="PackedScene" uid="uid://3wn20w5y2yb8" path="res://scenes/inventorySlot.tscn" id="2_88vot"]
+
+[node name="inventorySpawnGrid" type="GridContainer" unique_id=2007281391]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_46sgt")
+slotPrefab = ExtResource("2_88vot")

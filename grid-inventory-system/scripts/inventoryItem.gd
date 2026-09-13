@@ -1,7 +1,6 @@
 class_name InventoryItem
 extends Control
 
-
 @onready var inventorySprite : Node = $inventoryItem_Sprite; 
 
 #Max width and height of the space an item takes up
