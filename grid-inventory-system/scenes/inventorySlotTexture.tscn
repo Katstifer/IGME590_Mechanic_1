@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://col1gcp5efvwb"]
+
+[ext_resource type="Script" uid="uid://g4mewdjg7lam" path="res://scripts/inventorySlot.gd" id="1_8p2ph"]
+[ext_resource type="Texture2D" uid="uid://d1426b81y6diw" path="res://assets/InventorySlotPlaceholder.png" id="2_dvwbi"]
+
+[node name="inventorySlot" type="CenterContainer" unique_id=1936996517]
+custom_minimum_size = Vector2(16, 16)
+custom_maximum_size = Vector2(1600, 1600)
+offset_right = 32.0
+offset_bottom = 32.0
+script = ExtResource("1_8p2ph")
+
+[node name="inventorySlot_Rect" type="TextureRect" parent="." unique_id=763346943]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+texture = ExtResource("2_dvwbi")
+expand_mode = 5

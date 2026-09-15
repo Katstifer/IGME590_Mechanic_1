@@ -10,13 +10,15 @@ var currentInventory: InventoryGrid;
 var mouseOnGrid : bool = false; 
 
 @export var inventoryGrids : Array[InventoryGrid];
+@export var spawnHandler : InventoryItemSpawnHandler; 
+@export var slotSize : int = 64; 
 
 func _ready() -> void:
 	for grid in inventoryGrids: 
+		grid.setFields(self, spawnHandler, slotSize);
 		grid.mouseEnteredGrid.connect(onMouseEnterGrid);
 		grid.mouseExitedGrid.connect(onMouseExitGrid);
 		grid.mouseEnteredGridSlot.connect(onMouseEnterSlot);
-		pass; 
 
 func _process(delta: float) -> void:
 	if (currentInventory != null):
@@ -48,8 +50,7 @@ func _process(delta: float) -> void:
 		if Input.is_action_just_pressed("Rotate"):
 			print("Attempting to rotate: " + str(currentHeldItem));
 			currentHeldItem.rotateItem(); 
-			currentInventory.handleSlotHighlights(currentSlot, currentHeldItem);
-			
+						
 			if (currentInventory != null && currentSlot != null):
 				currentInventory.handleSlotHighlights(currentSlot, currentHeldItem);
 				
@@ -83,7 +84,30 @@ func pickupItem():
 		currentHeldItem.get_parent().move_child(currentHeldItem, currentHeldItem.get_parent().get_child_count() - 1)
 	
 func dropItem():
-	var itemDropped = currentInventory.dropItem(currentHeldItem);
+	if (currentHeldItem.previousContainer == null):
+		print("Can't drop item without previous slot.")
+		return; 
+	
+	if (currentHeldItem.previousAngle != currentHeldItem.angle):
+		currentHeldItem.rotateToAngle(currentHeldItem.previousAngle);
+	
+	var targetInventory; 
+	if (currentInventory == null):
+		print("Inventory hovered is null, finding inventory of slot.")
+		targetInventory = findInventoryOfSlot(currentHeldItem.previousContainer);
+		if (targetInventory == null):
+			print("Can't find inventory of slot.");
+			return; 
+	elif (!currentInventory.slotData.has(currentHeldItem.previousContainer)):
+		print("Finding inventory that contains slot.");
+		targetInventory = findInventoryOfSlot(currentHeldItem.previousContainer);
+		if (targetInventory == null):
+			print("Can't find inventory of slot.");
+			return; 
+	else: 
+		targetInventory = currentInventory; 
+		
+	var itemDropped = targetInventory.dropItem(currentHeldItem);
 	if (itemDropped):
 		currentHeldItem = null; 
 	else:
@@ -101,3 +125,9 @@ func swapItem():
 	if (swapItem != null):
 		currentHeldItem = swapItem; 
 		currentHeldItem.get_parent().move_child(currentHeldItem, currentHeldItem.get_parent().get_child_count() - 1)
+
+func findInventoryOfSlot(slot: InventorySlot) -> InventoryGrid: 
+	for grid in inventoryGrids: 
+		if (grid.slotData.has(slot)):
+			return grid; 
+	return null; 

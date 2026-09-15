@@ -1,27 +1,21 @@
 class_name InventoryGrid
 extends GridContainer
 
-@export var slotSize: int = 64; 
+var slotSize: int = 64; 
 var slotBorderWidth: int = 2; 
 
 @export var width: int = 3; 
 @export var height: int = 3; 
 
 var slotData: Array[InventorySlot] = []; 
-
-#var currentSlot: InventorySlot; 
-#var previousSlot: InventorySlot; 
-
-#var currentHeldItem: InventoryItem = null; 
-
 var highlightedSlots: Array[InventorySlot] = [];
 
 const GlobalEnums = preload("res://scripts/globalEnums.gd");
 
 @export var slotPrefab: PackedScene; 
 
-@export var spawnHandler : Node; 
-@export var inputHandler : Node; 
+var spawnHandler : Node; 
+var inputHandler : Node; 
 
 var mouseHovering : bool = false; 
 signal mouseEnteredGrid(grid: InventoryGrid);
@@ -29,6 +23,13 @@ signal mouseExitedGrid(grid: InventoryGrid);
 signal mouseEnteredGridSlot(slot: InventorySlot);
 
 func _ready() -> void:
+	self.add_theme_constant_override("h_separation", 0);
+	self.add_theme_constant_override("v_separation", 0);
+	
+func setFields(inputHandler: InventoryInputHandler, spawnHandler: InventoryItemSpawnHandler, slotSize: int):
+	self.inputHandler = inputHandler; 
+	self.spawnHandler = spawnHandler; 
+	self.slotSize = slotSize;
 	setupInventory(); 
 	
 func _process(delta: float) -> void:
@@ -130,7 +131,15 @@ func pickupItem(slot: InventorySlot):
 		print("Slot does not contain item");
 		return null; 
 		
-				
+func getSlotsWithItem(item: InventoryItem):
+	var containSlots: Array[InventorySlot] = []; 
+	
+	for s in slotData: 
+		if s.containedItem == item:
+			containSlots.append(s);
+	
+	return containSlots; 
+					
 func clearItemsTiles(item : InventoryItem):
 		for s in slotData: 
 			if s.containedItem == item: 
@@ -301,10 +310,14 @@ func handleSlotHighlights(currentSlot: InventorySlot, currentHeldItem: Inventory
 			highlightSlots(highlightedSlots, highlightColor);	
 			
 		else : #NO HELD ITEM: -> Item is just hovering
-			var newSlots : Array[InventorySlot] = [];
-			newSlots.append(currentSlot);
+			var newSlots : Array[InventorySlot];
+			if (currentSlot.containedItem != null):
+				newSlots = getSlotsWithItem(currentSlot.containedItem);
+			else: 
+				newSlots = [];
+				newSlots.append(currentSlot);
 			if highlightedSlots != null && highlightedSlots.size() > 0:
-				#Check if highlighted slots exists
+					#Check if highlighted slots exists
 				var resultsToUnhighlight = highlightedSlots.filter(
 					func(slot): return not newSlots.has(slot)
 				)

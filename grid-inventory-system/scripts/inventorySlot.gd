@@ -3,8 +3,8 @@ extends CenterContainer
 
 const GlobalEnums = preload("res://scripts/globalEnums.gd");
 
-@onready var mainRect: ColorRect = $inventorySlot_Rect;
-@onready var innerRect: ColorRect = $inventorySlot_Rect/inventorySlot_InnerRect; 
+@export var mainRect: Control;
+@export var innerRect: Control;
 
 
 var rectSize: int;
@@ -21,6 +21,8 @@ signal mouseExitedSlot(slot: InventorySlot)
 signal attemptItemPickup(slot: InventorySlot)
 
 func _ready() -> void:	
+	if mainRect == null: 
+		mainRect = $inventorySlot_Rect;
 	setSize(rectSize, borderWidth);
 	currentState = GlobalEnums.SlotState.DEFAULT; 
 	updateSlotColor(GlobalEnums.SlotState.DEFAULT);
@@ -44,24 +46,25 @@ func setSize(size, borderWidth):
 	custom_minimum_size = Vector2(size, size);
 	mainRect.custom_minimum_size = Vector2(size, size);
 	
-	var innerRectSize = size - (2 * borderWidth); 
-	innerRect.custom_minimum_size = Vector2(innerRectSize, innerRectSize);
-	
-	innerRect.offset_left = borderWidth
-	innerRect.offset_top = borderWidth
-	innerRect.offset_right = -borderWidth
-	innerRect.offset_bottom = -borderWidth
+	if (innerRect != null):
+		var innerRectSize = size - (2 * borderWidth); 
+		innerRect.custom_minimum_size = Vector2(innerRectSize, innerRectSize);
+		
+		innerRect.offset_left = borderWidth
+		innerRect.offset_top = borderWidth
+		innerRect.offset_right = -borderWidth
+		innerRect.offset_bottom = -borderWidth
 
 func updateSlotColor(state: GlobalEnums.SlotState): 
 	match state: 
 		GlobalEnums.SlotState.DEFAULT: 
-			mainRect.color = Color(Color.DIM_GRAY, 0.2);
+			mainRect.modulate = Color.WHITE;
 		GlobalEnums.SlotState.EMPTY: 
-			mainRect.color = Color(Color.GREEN, 0.2);
+			mainRect.modulate = Color(Color.GREEN, 0.2);
 		GlobalEnums.SlotState.TAKEN: 
-			mainRect.color = Color(Color.RED, 0.2);
+			mainRect.modulate = Color(Color.RED, 0.2);
 		GlobalEnums.SlotState.HOVERED: 
-			mainRect.color = Color(Color.YELLOW, 0.2);
+			mainRect.modulate = Color(Color.YELLOW, 0.8);
 		
 func addItem(item: InventoryItem):
 	containedItem = item; 

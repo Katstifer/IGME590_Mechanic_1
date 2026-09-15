@@ -14,15 +14,16 @@ var lerpSpeed: int = 20;
 #0 represents an empty tile and 1 represents an occupied one
 @export var itemGrid: Array[Array] = [];
 @export var anchor: Vector2i; 
-@export var zeroOffset: Vector2; 
+var zeroOffset: Vector2; 
 
 #Angle item is rotated to
-@export var angle: int = 0; 
+var angle: int = 0; 
+var previousAngle: int = 0; 
 
 #Whether the item has been selected and is moving with the mouse
-@export var isSelected : bool = false; 
+var isSelected : bool = false; 
 #Whether the item is currently moving to its target location on the grid
-@export var isMovingToGrid : bool = false; 
+var isMovingToGrid : bool = false; 
 
 #The slot this item is contained in (top-left, to keep track of location)
 var slotContainer: InventorySlot = null; 
@@ -88,7 +89,8 @@ func findZeroOffset():
 func pickUpItem():
 	if isSelected:
 		return 
-		
+	
+	previousAngle = angle; 
 	previousContainer = slotContainer; 
 	slotContainer = null; 
 	
@@ -170,3 +172,7 @@ func lerpToPosition(delta):
 	
 	if ( Vector2i(get_global_position().round()) == Vector2i((targetPosition - zeroOffset).round()) ):
 		isMovingToGrid = false; 
+
+func rotateToAngle(targetAngle: int):
+	while (angle != targetAngle):
+		rotateItem(); 

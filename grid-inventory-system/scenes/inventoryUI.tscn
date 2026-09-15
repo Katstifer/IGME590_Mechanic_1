@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://iy8lrgi7oj0g" path="res://scenes/itemPlaceholders/inventoryItem_placeholderRightL.tscn" id="9_78ej7"]
 [ext_resource type="PackedScene" uid="uid://tlvoga8rr1wf" path="res://scenes/itemPlaceholders/inventoryItem_placeholderLeftL.tscn" id="10_mo0sc"]
 [ext_resource type="Script" uid="uid://b8dqs3a65hwx2" path="res://scripts/inventoryItemSpawnHandler.gd" id="12_s7i53"]
+[ext_resource type="PackedScene" uid="uid://dpoqisc0j7145" path="res://scenes/inventoryInputHandler.tscn" id="13_itj25"]
 
 [node name="inventory" type="Control" unique_id=552610218]
 layout_mode = 3
@@ -30,14 +31,13 @@ layout_mode = 0
 offset_right = 1152.0
 offset_bottom = 464.0
 
-[node name="inventoryGrid" type="GridContainer" parent="inventoryGridContainer" unique_id=832715770 node_paths=PackedStringArray("spawnHandler")]
+[node name="inventoryGrid" type="GridContainer" parent="inventoryGridContainer" unique_id=832715770]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 script = ExtResource("2_xnuj3")
 width = 16
 height = 6
 slotPrefab = ExtResource("3_w76af")
-spawnHandler = NodePath("../../inventoryItemSpawner")
 
 [node name="spawnButton" type="Button" parent="." unique_id=1308939927]
 layout_mode = 0
@@ -52,10 +52,14 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="inventoryItemSpawner" type="Node" parent="." unique_id=1042184566 node_paths=PackedStringArray("itemContainer", "inventoryGrid")]
+[node name="inventoryItemSpawner" type="Node" parent="." unique_id=1042184566 node_paths=PackedStringArray("itemContainer", "inputHandler")]
 script = ExtResource("12_s7i53")
 inventoryItemPrefabs = Array[PackedScene]([ExtResource("2_7tsa3"), ExtResource("8_yjs64"), ExtResource("4_dji2x"), ExtResource("5_llgub"), ExtResource("5_iph1u"), ExtResource("10_mo0sc"), ExtResource("6_s7i53"), ExtResource("9_78ej7"), ExtResource("7_itj25")])
 itemContainer = NodePath("../inventoryItemContainer")
-inventoryGrid = NodePath("../inventoryGridContainer/inventoryGrid")
+inputHandler = NodePath("../inventoryInputHandler")
+
+[node name="inventoryInputHandler" parent="." unique_id=809811834 node_paths=PackedStringArray("inventoryGrids") instance=ExtResource("13_itj25")]
+layout_mode = 0
+inventoryGrids = [NodePath("../inventoryGridContainer/inventoryGrid")]
 
 [connection signal="pressed" from="spawnButton" to="inventoryItemSpawner" method="onSpawnButtonPressed"]

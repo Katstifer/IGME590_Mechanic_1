@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://b5e86y7a5adiv" path="res://scenes/inventoryGrid.tscn" id="1_xa48b"]
 [ext_resource type="PackedScene" uid="uid://daav62vamn21a" path="res://scenes/itemPlaceholders/inventoryItem_placeholderT.tscn" id="2_6gpvr"]
+[ext_resource type="PackedScene" uid="uid://col1gcp5efvwb" path="res://scenes/inventorySlotTexture.tscn" id="2_487jm"]
 [ext_resource type="PackedScene" uid="uid://b5g7c82va4yue" path="res://scenes/itemPlaceholders/inventoryItem_placeholderU.tscn" id="3_487jm"]
 [ext_resource type="PackedScene" uid="uid://bqlgb7gsqsssg" path="res://scenes/itemPlaceholders/inventoryItem_placeholder1by1.tscn" id="4_egp7t"]
 [ext_resource type="PackedScene" uid="uid://dfd0chypuljd8" path="res://scenes/itemPlaceholders/inventoryItem_placeholder2by1.tscn" id="5_n6l6t"]
@@ -12,7 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://bb542x5u0loe" path="res://scenes/itemPlaceholders/inventoryItem_placeholderRightZ.tscn" id="10_f7rn0"]
 [ext_resource type="Script" uid="uid://b8dqs3a65hwx2" path="res://scripts/inventoryItemSpawnHandler.gd" id="12_eiu8o"]
 [ext_resource type="PackedScene" uid="uid://bsyu0g6eb2h21" path="res://scenes/inventorySpawnGrid.tscn" id="13_6gpvr"]
-[ext_resource type="Script" uid="uid://d3b8dvfeh4q14" path="res://scenes/inventoryInputHandler.gd" id="13_487jm"]
+[ext_resource type="Script" uid="uid://d3b8dvfeh4q14" path="res://scripts/inventoryInputHandler.gd" id="13_487jm"]
 
 [node name="inventory" type="Control" unique_id=552610218]
 layout_mode = 3
@@ -35,6 +36,7 @@ offset_bottom = 460.0
 [node name="inventoryGrid" parent="inventoryGridContainer" unique_id=1645351382 instance=ExtResource("1_xa48b")]
 layout_mode = 2
 width = 10
+slotPrefab = ExtResource("2_487jm")
 
 [node name="inventorySpawnGridContainer" type="CenterContainer" parent="." unique_id=27452485]
 custom_minimum_size = Vector2(32, 32)
@@ -66,9 +68,11 @@ inventoryItemPrefabs = Array[PackedScene]([ExtResource("2_6gpvr"), ExtResource("
 itemContainer = NodePath("../inventoryItemContainer")
 inputHandler = NodePath("../inputHandler")
 
-[node name="inputHandler" type="Control" parent="." unique_id=10590482 node_paths=PackedStringArray("inventoryGrids")]
+[node name="inputHandler" type="Control" parent="." unique_id=10590482 node_paths=PackedStringArray("inventoryGrids", "spawnHandler")]
 anchors_preset = 0
 script = ExtResource("13_487jm")
 inventoryGrids = [NodePath("../inventoryGridContainer/inventoryGrid"), NodePath("../inventorySpawnGridContainer/inventorySpawnGrid")]
+spawnHandler = NodePath("../inventoryItemSpawner")
+slotSize = 32
 
 [connection signal="pressed" from="spawnButton" to="inventoryItemSpawner" method="onSpawnButtonPressed"]
