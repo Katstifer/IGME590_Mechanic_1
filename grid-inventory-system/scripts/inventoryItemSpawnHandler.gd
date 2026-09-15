@@ -3,14 +3,12 @@ extends Node
 
 @export var inventoryItemPrefabs : Array[PackedScene];
 @export var itemContainer : Control; 
-@export var inventoryGrid : InventoryGrid; 
-@export var inventorySpawnGrid : Node; 
+@export var inputHandler : InventoryInputHandler; 
 
 func setFields(prefabs : Array[PackedScene], container : Control): 
 	inventoryItemPrefabs = prefabs; 
 	itemContainer = container; 
 	
-
 func spawnItem() -> InventoryItem:
 	if (inventoryItemPrefabs.size() <= 0):
 		return; 
@@ -25,13 +23,13 @@ func spawnItem() -> InventoryItem:
 
 func onSpawnButtonPressed() -> void:
 	print("Spawn button pressed!");
-	if (inventoryGrid == null):
-		print("Inventory Grid is null");
+	if (inputHandler == null):
+		print("Input handler is null");
 		return; 
-	if (inventoryGrid.currentHeldItem != null): 
+	if (inputHandler.currentHeldItem != null): 
 		print("Can't spawn item while holding another.");
 		return; 
 		
 	var newItem = spawnItem(); 
 	newItem.isSelected = true; 
-	inventoryGrid.currentHeldItem = newItem; 
+	inputHandler.currentHeldItem = newItem; 

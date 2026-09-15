@@ -60,14 +60,15 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="inventoryItemSpawner" type="Node" parent="." unique_id=1042184566 node_paths=PackedStringArray("itemContainer", "inventoryGrid", "inventorySpawnGrid")]
+[node name="inventoryItemSpawner" type="Node" parent="." unique_id=1042184566 node_paths=PackedStringArray("itemContainer", "inputHandler")]
 script = ExtResource("12_eiu8o")
 inventoryItemPrefabs = Array[PackedScene]([ExtResource("2_6gpvr"), ExtResource("3_487jm"), ExtResource("4_egp7t"), ExtResource("5_n6l6t"), ExtResource("6_pkbt3"), ExtResource("7_7wnr7"), ExtResource("8_nkhev"), ExtResource("9_c6pf0"), ExtResource("10_f7rn0")])
 itemContainer = NodePath("../inventoryItemContainer")
-inventoryGrid = NodePath("../inventoryGridContainer/inventoryGrid")
-inventorySpawnGrid = NodePath("../inventorySpawnGridContainer/inventorySpawnGrid")
+inputHandler = NodePath("../inputHandler")
 
-[node name="inputHandler" type="Node" parent="." unique_id=1258217183]
+[node name="inputHandler" type="Control" parent="." unique_id=10590482 node_paths=PackedStringArray("inventoryGrids")]
+anchors_preset = 0
 script = ExtResource("13_487jm")
+inventoryGrids = [NodePath("../inventoryGridContainer/inventoryGrid"), NodePath("../inventorySpawnGridContainer/inventorySpawnGrid")]
 
 [connection signal="pressed" from="spawnButton" to="inventoryItemSpawner" method="onSpawnButtonPressed"]
