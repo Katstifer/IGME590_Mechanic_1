@@ -30,6 +30,7 @@ func setFields(inputHandler: InventoryInputHandler, spawnHandler: InventoryItemS
 	self.inputHandler = inputHandler; 
 	self.spawnHandler = spawnHandler; 
 	self.slotSize = slotSize;
+	print("Slot size in grid: " + str(slotSize));
 	setupInventory(); 
 	
 func _process(delta: float) -> void:
@@ -270,7 +271,7 @@ func checkForFit(itemShape: Array, potentialSlots: Array[InventorySlot]):
 		# would go into are empty. If they are, return true.
 		for slot in potentialSlots: 
 			if slot.containedItem != null: 
-				print("Slot contains item");
+				#print("Slot contains item");
 				return false; 
 		return true
 

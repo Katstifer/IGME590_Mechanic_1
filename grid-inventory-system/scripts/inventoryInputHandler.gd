@@ -9,16 +9,24 @@ var currentInventory: InventoryGrid;
 
 var mouseOnGrid : bool = false; 
 
-@export var inventoryGrids : Array[InventoryGrid];
 @export var spawnHandler : InventoryItemSpawnHandler; 
+@export var inventoryGrids : Array[InventoryGrid];
+@export var itemContainer : Control; 
+@export var inventoryItemPrefabs : Array[PackedScene];
+var spawnGrid : InventorySpawnGrid = null; 
+
 @export var slotSize : int = 64; 
 
 func _ready() -> void:
 	for grid in inventoryGrids: 
+		if (grid is InventorySpawnGrid):
+			spawnGrid = grid; 
 		grid.setFields(self, spawnHandler, slotSize);
 		grid.mouseEnteredGrid.connect(onMouseEnterGrid);
 		grid.mouseExitedGrid.connect(onMouseExitGrid);
 		grid.mouseEnteredGridSlot.connect(onMouseEnterSlot);
+		
+	spawnHandler.setFields(inventoryItemPrefabs, self, itemContainer, spawnGrid);
 
 func _process(delta: float) -> void:
 	if (currentInventory != null):
