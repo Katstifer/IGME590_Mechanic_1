@@ -12,12 +12,13 @@ script = ExtResource("1_0ynsv")
 [node name="inventorySlot_Rect" type="ColorRect" parent="." unique_id=1301267047]
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
+color = Color(0.585062, 0.585062, 0.5850621, 1)
 
 [node name="inventorySlot_InnerRect" type="ColorRect" parent="inventorySlot_Rect" unique_id=1256802823]
 visible = false
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 0
-offset_left = -15.0
-offset_top = -15.0
-offset_right = 15.0
-offset_bottom = 15.0
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 22.0
+offset_bottom = 22.0

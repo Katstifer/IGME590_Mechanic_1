@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://b0frpb4vt1wq0"]
 
 [ext_resource type="PackedScene" uid="uid://b5e86y7a5adiv" path="res://scenes/inventoryGrid.tscn" id="1_xa48b"]
-[ext_resource type="PackedScene" uid="uid://col1gcp5efvwb" path="res://scenes/inventorySlotTexture.tscn" id="2_487jm"]
 [ext_resource type="PackedScene" uid="uid://bb542x5u0loe" path="res://scenes/itemPlaceholders/inventoryItem_placeholderRightZ.tscn" id="6_487jm"]
 [ext_resource type="PackedScene" uid="uid://iy8lrgi7oj0g" path="res://scenes/itemPlaceholders/inventoryItem_placeholderRightL.tscn" id="7_egp7t"]
 [ext_resource type="PackedScene" uid="uid://d1ve403gk5odd" path="res://scenes/itemPlaceholders/inventoryItem_placeholderLeftZ.tscn" id="8_n6l6t"]
@@ -36,7 +35,6 @@ offset_bottom = 460.0
 [node name="inventoryGrid" parent="inventoryGridContainer" unique_id=1645351382 instance=ExtResource("1_xa48b")]
 layout_mode = 2
 width = 10
-slotPrefab = ExtResource("2_487jm")
 
 [node name="inventorySpawnGridContainer" type="CenterContainer" parent="." unique_id=27452485]
 custom_minimum_size = Vector2(32, 32)
