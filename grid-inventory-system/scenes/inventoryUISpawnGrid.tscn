@@ -1,0 +1,65 @@
+[gd_scene format=3 uid="uid://k1cni31ge4ta"]
+
+[ext_resource type="Script" uid="uid://c2u662o61mty5" path="res://scripts/inventorySpawnGrid.gd" id="1_el1kk"]
+[ext_resource type="PackedScene" uid="uid://3wn20w5y2yb8" path="res://scenes/inventorySlot.tscn" id="2_1l73g"]
+[ext_resource type="Script" uid="uid://b8dqs3a65hwx2" path="res://scripts/inventoryItemSpawnHandler.gd" id="3_m3jjl"]
+[ext_resource type="PackedScene" uid="uid://dpoqisc0j7145" path="res://scenes/inventoryInputHandler.tscn" id="4_aypat"]
+[ext_resource type="PackedScene" uid="uid://tlvoga8rr1wf" path="res://scenes/itemPlaceholders/inventoryItem_placeholderLeftL.tscn" id="5_6wode"]
+[ext_resource type="PackedScene" uid="uid://daav62vamn21a" path="res://scenes/itemPlaceholders/inventoryItem_placeholderT.tscn" id="6_b4f1t"]
+[ext_resource type="PackedScene" uid="uid://b5g7c82va4yue" path="res://scenes/itemPlaceholders/inventoryItem_placeholderU.tscn" id="7_ild07"]
+[ext_resource type="PackedScene" uid="uid://bqlgb7gsqsssg" path="res://scenes/itemPlaceholders/inventoryItem_placeholder1by1.tscn" id="8_2m0kr"]
+[ext_resource type="PackedScene" uid="uid://dfd0chypuljd8" path="res://scenes/itemPlaceholders/inventoryItem_placeholder2by1.tscn" id="9_371fu"]
+[ext_resource type="PackedScene" uid="uid://cflusxmhytxke" path="res://scenes/itemPlaceholders/inventoryItem_placeholderStar.tscn" id="10_g3ki5"]
+[ext_resource type="PackedScene" uid="uid://d1ve403gk5odd" path="res://scenes/itemPlaceholders/inventoryItem_placeholderLeftZ.tscn" id="11_ebu5x"]
+[ext_resource type="PackedScene" uid="uid://iy8lrgi7oj0g" path="res://scenes/itemPlaceholders/inventoryItem_placeholderRightL.tscn" id="12_ffbuy"]
+[ext_resource type="PackedScene" uid="uid://bb542x5u0loe" path="res://scenes/itemPlaceholders/inventoryItem_placeholderRightZ.tscn" id="13_5xq5i"]
+
+[node name="inventory" type="Control" unique_id=552610218]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1088.0
+offset_bottom = -584.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="inventoryGridContainer" type="CenterContainer" parent="." unique_id=1048313107]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 464.0
+
+[node name="inventoryGrid" type="GridContainer" parent="inventoryGridContainer" unique_id=832715770]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+script = ExtResource("1_el1kk")
+width = 16
+height = 6
+slotPrefab = ExtResource("2_1l73g")
+
+[node name="spawnButton" type="Button" parent="." unique_id=1308939927]
+layout_mode = 0
+offset_left = 401.0
+offset_top = 517.0
+offset_right = 742.0
+offset_bottom = 612.0
+text = "Spawn Inventory Item"
+
+[node name="inventoryItemContainer" type="Control" parent="." unique_id=500589188]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="inventoryItemSpawner" type="Node" parent="." unique_id=1042184566]
+script = ExtResource("3_m3jjl")
+
+[node name="inventoryInputHandler" parent="." unique_id=809811834 node_paths=PackedStringArray("spawnHandler", "inventoryGrids", "itemContainer") instance=ExtResource("4_aypat")]
+layout_mode = 0
+spawnHandler = NodePath("../inventoryItemSpawner")
+inventoryGrids = [NodePath("../inventoryGridContainer/inventoryGrid")]
+itemContainer = NodePath("../inventoryItemContainer")
+inventoryItemPrefabs = Array[PackedScene]([ExtResource("5_6wode"), ExtResource("6_b4f1t"), ExtResource("7_ild07"), ExtResource("8_2m0kr"), ExtResource("9_371fu"), ExtResource("10_g3ki5"), ExtResource("11_ebu5x"), ExtResource("12_ffbuy"), ExtResource("13_5xq5i")])
+
+[connection signal="pressed" from="spawnButton" to="inventoryInputHandler" method="onSpawnButtonPress"]

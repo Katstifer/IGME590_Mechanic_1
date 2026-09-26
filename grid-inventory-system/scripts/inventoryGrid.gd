@@ -1,73 +1,45 @@
 class_name InventoryGrid
 extends GridContainer
 
-@export var slotSize: int = 64; 
+var slotSize: int = 64; 
 var slotBorderWidth: int = 2; 
 
 @export var width: int = 3; 
 @export var height: int = 3; 
 
-var vertSeparation: int = 0;
-var horSeparation: int = 0; 
-
 var slotData: Array[InventorySlot] = []; 
-
-var currentSlot: InventorySlot; 
-var previousSlot: InventorySlot; 
-
-var currentHeldItem: InventoryItem = null; 
-
-var alreadyHighlighted = false; 
 var highlightedSlots: Array[InventorySlot] = [];
-
-@export var inventoryItemPrefabs: Array[PackedScene] = [];
-
-const GlobalEnums = preload("res://scripts/globalEnums.gd");
 
 @export var slotPrefab: PackedScene; 
 
-@export var itemContainer : Node; 
-@export var spawnHandler : Node; 
+var spawnHandler : Node; 
+var inputHandler : Node; 
+
+var mouseHovering : bool = false; 
+signal mouseEnteredGrid(grid: InventoryGrid);
+signal mouseExitedGrid(grid: InventoryGrid);
+signal mouseEnteredGridSlot(slot: InventorySlot);
 
 func _ready() -> void:
-	add_theme_constant_override("h_separation", horSeparation);
-	add_theme_constant_override("v_separation", vertSeparation);
+	self.add_theme_constant_override("h_separation", 0);
+	self.add_theme_constant_override("v_separation", 0);
 	
+func setFields(inputHandler: InventoryInputHandler, spawnHandler: InventoryItemSpawnHandler, slotSize: int):
+	self.inputHandler = inputHandler; 
+	self.spawnHandler = spawnHandler; 
+	self.slotSize = slotSize;
 	setupInventory(); 
-		
+	
 func _process(delta: float) -> void:
-	if (!get_global_rect().has_point((get_global_mouse_position()))):
-		if (currentSlot != null):
-			currentSlot = null
-		if (highlightedSlots.size() > 0 && highlightedSlots != null):
-			unhighlightSlots(highlightedSlots);
-	if (currentHeldItem != null && currentSlot != null):
-		#If an item is being held and it is being hovered over a grid
-		if (currentSlot != previousSlot):
-		#If a new slot is being hovered over
-			handleSlotHighlights();
-			previousSlot = currentSlot; 
-				
-		if Input.is_action_just_pressed("Place"):
-			attemptItemPlace(currentSlot, currentHeldItem);
-		elif Input.is_action_just_pressed("SwapItem"):
-			swapItem(currentSlot);
-			
-	elif (currentSlot != null):
-		if (currentSlot != previousSlot):
-			handleSlotHighlights(); 
-		if Input.is_action_just_pressed("PickUp"):
-			pickupItem(currentSlot);
-			
-	if (currentHeldItem != null):
-		if Input.is_action_just_pressed("Rotate"):
-			currentHeldItem.rotateItem(); 
-			handleSlotHighlights(); 
-			
-		if Input.is_action_just_pressed("DropItem"):
-			dropItem(); 
-			handleSlotHighlights(); 
-			
+	
+	if (get_global_rect().has_point((get_global_mouse_position()))):
+		if mouseHovering == false: 
+			mouseHovering = true; 
+			emit_signal("mouseEnteredGrid", self);
+	else:
+		if mouseHovering == true:
+			mouseHovering = false; 
+			emit_signal("mouseExitedGrid", self);
 	
 # Setup inventory by filling the grid container with slots
 func setupInventory(): 
@@ -95,8 +67,7 @@ func createEmptySlotData():
 	
 # Called whenever the mouse enters the area of a slot. 
 func onSlotMouseEnter(slot: InventorySlot):
-	previousSlot = currentSlot; 
-	currentSlot = slot; 
+	emit_signal("mouseEnteredGridSlot", slot);
 
 # Called whenever the mouse leaves the area of a slot
 func onSlotMouseExit(slot: InventorySlot):
@@ -140,75 +111,78 @@ func getIndexFromCoords(row: int, column: int):
 #It will attempt to place an item using the top left-most
 #tile in the item's structure. 
 func placeItem(item: InventoryItem, anchorSlot: InventorySlot, fitSlots : Array[InventorySlot]):
+	if (item.isSelected):
+		item.isSelected = false; 
+		
 	for s in fitSlots: 
 		s.addItem(item);
 	if (anchorSlot != null):
 		item.placeItem(anchorSlot);
-	currentHeldItem = null; 
 
 func pickupItem(slot: InventorySlot):
 	if (slot.containedItem != null):
-		currentHeldItem = slot.containedItem;
+		var currentHeldItem = slot.containedItem;
 		currentHeldItem.pickUpItem(); 
-		
 		clearItemsTiles(currentHeldItem);
-		currentHeldItem.get_parent().move_child(currentHeldItem, currentHeldItem.get_parent().get_child_count() - 1)
-				
+		return currentHeldItem; 
+	else:
+		print("Slot does not contain item");
+		return null; 
+		
+func getSlotsWithItem(item: InventoryItem):
+	var containSlots: Array[InventorySlot] = []; 
+	
+	for s in slotData: 
+		if s.containedItem == item:
+			containSlots.append(s);
+	
+	return containSlots; 
+					
 func clearItemsTiles(item : InventoryItem):
 		for s in slotData: 
 			if s.containedItem == item: 
 				s.removeItem();
 	
-func swapItem(slot: InventorySlot):
-	if (slot.containedItem == null):
+func swapItem(currentSlot: InventorySlot, currentHeldItem: InventoryItem):
+	if (currentSlot.containedItem == null):
 		print("Can't swap -- no item in slot");
-		return;
+		return null; 
 	if (currentHeldItem == null):
-		return; 
+		print("Can't swap without a held item")
+		return null; 		
 		
-	var swapItem = currentHeldItem; 
-	pickupItem(currentSlot);
-	var newCurrentItem = currentHeldItem; 
+	var itemToPlace = currentHeldItem; 
+	currentHeldItem = pickupItem(currentSlot);
 	
-	var fitSpaces = getPotentialSpace(currentSlot, swapItem);
-	if (checkForFit(swapItem.itemGrid, fitSpaces)):
-
-		placeItem(swapItem, currentSlot, fitSpaces);
-		currentHeldItem = newCurrentItem; 
-		currentHeldItem.isSelected = true; 
-	else : 
-		attemptItemPlace(currentHeldItem.previousContainer, currentHeldItem);
-		currentHeldItem = swapItem; 
-		currentHeldItem.isSelected = true; 
-		currentHeldItem.get_parent().move_child(currentHeldItem, currentHeldItem.get_parent().get_child_count() - 1)
+	if (currentHeldItem == null):
+		print("Couldn't pick up item.");
+		return null; 
 		
-func dropItem():
-	if (currentHeldItem.previousContainer == null):
-		return; 
+	var fitSpaces = getPotentialSpace(currentSlot, itemToPlace);
+	if (checkForFit(itemToPlace.itemGrid, fitSpaces)):
+		print("Item swapped.")
+		placeItem(itemToPlace, currentSlot, fitSpaces);
+		currentHeldItem.isSelected = true; 
+		return currentHeldItem; 
+	else: 
+		print("New item does not fit.")
+		attemptItemPlace(currentHeldItem.previousContainer, currentHeldItem);
+		currentHeldItem = itemToPlace; 
+		currentHeldItem.isSelected = true; 
+		return currentHeldItem;
+		
+func dropItem(currentHeldItem : InventoryItem):
 	var targetSlot = currentHeldItem.previousContainer; 
-	attemptItemPlace(targetSlot, currentHeldItem);
+	var itemDropped = attemptItemPlace(targetSlot, currentHeldItem);
+	return itemDropped; 
 
-func attemptItemPlace(slot: InventorySlot, item: InventoryItem):
+func attemptItemPlace(slot: InventorySlot, item: InventoryItem) -> bool:
 	var fitSpaces = getPotentialSpace(slot, item);
 	if (checkForFit(item.itemGrid, fitSpaces)):
 		placeItem(item, slot, fitSpaces);
+		return true; 
 	else: 
-		return; 
-	
-#Spawns a new item in from the prefabs list (NOT IMPLEMENTED YET)
-func onSpawnButtonPress() -> void:
-	if (inventoryItemPrefabs.size() <= 0):
-		return; 
-	if (currentHeldItem != null): 
-		return; 
-		
-	var itemIndex = randi_range(0, inventoryItemPrefabs.size() - 1);
-	var newItem = inventoryItemPrefabs[itemIndex].instantiate(); 
-	
-	itemContainer.add_child(newItem);
-	
-	newItem.isSelected = true; 
-	currentHeldItem = newItem; 
+		return false; 
 
 #Gets the potential spaces on the grid that an item will occupy
 func getPotentialSpace(slot: InventorySlot, item: InventoryItem):
@@ -294,7 +268,7 @@ func checkForFit(itemShape: Array, potentialSlots: Array[InventorySlot]):
 		# would go into are empty. If they are, return true.
 		for slot in potentialSlots: 
 			if slot.containedItem != null: 
-				print("Slot contains item");
+				#print("Slot contains item");
 				return false; 
 		return true
 
@@ -311,9 +285,10 @@ func highlightSlots(slots: Array[InventorySlot], slotState: GlobalEnums.SlotStat
 
 #Highlights the appropriate slot based on the position of the mouse
 #and the state of held items, etc.
-func handleSlotHighlights():
+func handleSlotHighlights(currentSlot: InventorySlot, currentHeldItem: InventoryItem):
 	var mouseOnGrid = get_global_rect().has_point((get_global_mouse_position()));
 	
+	# all caps scares me
 	if (mouseOnGrid): #IF MOUSE OVER INVENTORY
 		if (currentHeldItem != null && currentSlot != null): #HELD ITEM: -> Hovering with item or going to rotate
 			var newSlots = getPotentialSpace(currentSlot, currentHeldItem);
@@ -334,18 +309,44 @@ func handleSlotHighlights():
 			highlightSlots(highlightedSlots, highlightColor);	
 			
 		else : #NO HELD ITEM: -> Item is just hovering
-			var newSlots : Array[InventorySlot] = [];
-			newSlots.append(currentSlot);
+			var newSlots : Array[InventorySlot];
+			if (currentSlot.containedItem != null):
+				newSlots = getSlotsWithItem(currentSlot.containedItem);
+			else: 
+				newSlots = [];
+				newSlots.append(currentSlot);
 			if highlightedSlots != null && highlightedSlots.size() > 0:
-				#Check if highlighted slots exists
+					#Check if highlighted slots exists
 				var resultsToUnhighlight = highlightedSlots.filter(
 					func(slot): return not newSlots.has(slot)
 				)
 				unhighlightSlots(resultsToUnhighlight);
-				highlightedSlots = newSlots; 
-				highlightSlots(highlightedSlots, GlobalEnums.SlotState.HOVERED);
+			highlightedSlots = newSlots; 
+			highlightSlots(highlightedSlots, GlobalEnums.SlotState.HOVERED);
 	else : #IF MOUSE OFF INVENTORY
 		#Unhighlight all slots.
 		if (highlightedSlots.size() > 0 && highlightedSlots != null):
 			unhighlightSlots(highlightedSlots);
 		
+#Finds the first space, going from left to right, top to bottom, 
+#where an item can fit
+func findFirstSpace(spawnItem: InventoryItem):
+	for slot in slotData:
+		var fitSlots = getPotentialSpace(slot, spawnItem);
+		if (checkForFit(spawnItem.itemGrid, fitSlots)):
+			return slot; 
+		else:
+			var currentAngle = 0; 
+			while (currentAngle < 360):
+				print("Rotating to find fit for: " + str(spawnItem));
+				print("Current angle: " + str(currentAngle));
+				spawnItem.rotateToAngle(currentAngle);
+				var tempSlots = getPotentialSpace(slot, spawnItem);
+				if (checkForFit(spawnItem.itemGrid, tempSlots)):
+					return slot; 
+				else: 
+					currentAngle += 90; 
+				
+		
+			
+	return null; 

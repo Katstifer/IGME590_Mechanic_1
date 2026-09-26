@@ -2,21 +2,15 @@
 
 [ext_resource type="Script" uid="uid://g4mewdjg7lam" path="res://scripts/inventorySlot.gd" id="1_0ynsv"]
 
-[node name="inventorySlot" type="CenterContainer" unique_id=1936996517]
+[node name="inventorySlot" type="CenterContainer" unique_id=1936996517 node_paths=PackedStringArray("mainRect")]
 custom_minimum_size = Vector2(16, 16)
 custom_maximum_size = Vector2(1600, 1600)
 offset_right = 32.0
 offset_bottom = 32.0
 script = ExtResource("1_0ynsv")
+mainRect = NodePath("inventorySlot_Rect")
 
 [node name="inventorySlot_Rect" type="ColorRect" parent="." unique_id=1301267047]
+custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
-
-[node name="inventorySlot_InnerRect" type="ColorRect" parent="inventorySlot_Rect" unique_id=1256802823]
-visible = false
-custom_minimum_size = Vector2(30, 30)
-layout_mode = 0
-offset_left = -15.0
-offset_top = -15.0
-offset_right = 15.0
-offset_bottom = 15.0
+color = Color(0.585062, 0.585062, 0.5850621, 1)

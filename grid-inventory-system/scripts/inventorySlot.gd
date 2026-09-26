@@ -1,14 +1,14 @@
 class_name InventorySlot
 extends CenterContainer
 
-const GlobalEnums = preload("res://scripts/globalEnums.gd");
-
-@onready var mainRect: ColorRect = $inventorySlot_Rect;
-@onready var innerRect: ColorRect = $inventorySlot_Rect/inventorySlot_InnerRect; 
-
+@export var mainRect: Control;
 
 var rectSize: int;
 var borderWidth: int;
+
+@export var hoverColor : Color = Color(Color.YELLOW, 0.8);
+@export var takenColor : Color = Color(Color.RED, 0.2);
+@export var openColor : Color = Color(Color.GREEN, 0.2);
 
 var currentState: GlobalEnums.SlotState;
 var mouseHovering = false; 
@@ -21,7 +21,10 @@ signal mouseExitedSlot(slot: InventorySlot)
 signal attemptItemPickup(slot: InventorySlot)
 
 func _ready() -> void:	
-	setSize(rectSize, borderWidth);
+	if mainRect == null: 
+		mainRect = $inventorySlot_Rect;
+		
+	setSize(rectSize);
 	currentState = GlobalEnums.SlotState.DEFAULT; 
 	updateSlotColor(GlobalEnums.SlotState.DEFAULT);
 
@@ -39,32 +42,27 @@ func _process(delta: float) -> void:
 			mouseHovering = false; 
 			emit_signal("mouseExitedSlot", self)
 		
-	
-func setSize(size, borderWidth):
+#Adjusts the size of the rectangle to match the slot size
+func setSize(size):
 	custom_minimum_size = Vector2(size, size);
 	mainRect.custom_minimum_size = Vector2(size, size);
-	
-	var innerRectSize = size - (2 * borderWidth); 
-	innerRect.custom_minimum_size = Vector2(innerRectSize, innerRectSize);
-	
-	innerRect.offset_left = borderWidth
-	innerRect.offset_top = borderWidth
-	innerRect.offset_right = -borderWidth
-	innerRect.offset_bottom = -borderWidth
 
+#Updates the color of the slot based on its state
 func updateSlotColor(state: GlobalEnums.SlotState): 
 	match state: 
 		GlobalEnums.SlotState.DEFAULT: 
-			mainRect.color = Color(Color.DIM_GRAY, 0.2);
+			mainRect.modulate = Color.WHITE;
 		GlobalEnums.SlotState.EMPTY: 
-			mainRect.color = Color(Color.GREEN, 0.2);
+			mainRect.modulate = openColor;
 		GlobalEnums.SlotState.TAKEN: 
-			mainRect.color = Color(Color.RED, 0.2);
+			mainRect.modulate = takenColor; 
 		GlobalEnums.SlotState.HOVERED: 
-			mainRect.color = Color(Color.YELLOW, 0.2);
-		
+			mainRect.modulate = hoverColor; 
+
+#Adds an item to be contained by the slot
 func addItem(item: InventoryItem):
 	containedItem = item; 
 	
+#Removes a contained item from the slot
 func removeItem():
 	containedItem = null; 

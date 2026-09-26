@@ -1,7 +1,20 @@
 [gd_scene format=3 uid="uid://k2xcvwhs5c8q"]
 
-[ext_resource type="PackedScene" uid="uid://c5l54b1dqtaen" path="res://scenes/inventoryUI.tscn" id="1_o5qli"]
+[ext_resource type="PackedScene" uid="uid://b0frpb4vt1wq0" path="res://scenes/inventoryUIDualGrid.tscn" id="1_o5qli"]
+[ext_resource type="PackedScene" uid="uid://tlvoga8rr1wf" path="res://scenes/itemPlaceholders/inventoryItem_placeholderLeftL.tscn" id="2_0wfyh"]
 
-[node name="main" type="Node2D" unique_id=1143999047]
+[node name="Node2D" type="Node2D" unique_id=214337541]
 
-[node name="inventoryUI" parent="." unique_id=552610218 instance=ExtResource("1_o5qli")]
+[node name="inventory" parent="." unique_id=552610218 instance=ExtResource("1_o5qli")]
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 1
+grow_vertical = 1
+
+[node name="inputHandler" parent="inventory" index="5" unique_id=10590482]
+inventoryItemPrefabs = Array[PackedScene]([ExtResource("2_0wfyh")])
+
+[editable path="inventory"]
