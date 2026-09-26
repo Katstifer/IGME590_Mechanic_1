@@ -331,6 +331,8 @@ func handleSlotHighlights(currentSlot: InventorySlot, currentHeldItem: Inventory
 #Finds the first space, going from left to right, top to bottom, 
 #where an item can fit
 func findFirstSpace(spawnItem: InventoryItem):
+	if (getOpenSlots() < spawnItem.getNumberOfTakenSlots()):
+		return null; 
 	for slot in slotData:
 		var fitSlots = getPotentialSpace(slot, spawnItem);
 		if (checkForFit(spawnItem.itemGrid, fitSlots)):
@@ -338,15 +340,20 @@ func findFirstSpace(spawnItem: InventoryItem):
 		else:
 			var currentAngle = 0; 
 			while (currentAngle < 360):
-				print("Rotating to find fit for: " + str(spawnItem));
-				print("Current angle: " + str(currentAngle));
 				spawnItem.rotateToAngle(currentAngle);
 				var tempSlots = getPotentialSpace(slot, spawnItem);
 				if (checkForFit(spawnItem.itemGrid, tempSlots)):
 					return slot; 
 				else: 
-					currentAngle += 90; 
-				
-		
-			
+					currentAngle += 90; 		
 	return null; 
+
+#Gets the number of slots open in the grid
+func getOpenSlots() : 
+	var sum = 0;
+	for slot in slotData: 
+		if slot.containedItem == null:
+			sum += 1; 
+	return sum; 
+	
+			

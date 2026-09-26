@@ -108,7 +108,7 @@ func initItemGrid(slotSize : int):
 		anchor.y = 0; 
 		
 	setItemScale(); 
-		
+	
 #If the item sprite does not scale properly to match the slot size, 
 #scale it up appropriately. Ex. 32 x 32 texture on a 64 x 64 slot. 
 func setItemScale(): 
@@ -235,3 +235,11 @@ func lerpToPosition(delta : float):
 func rotateToAngle(targetAngle: int):
 	while (angle != targetAngle):
 		rotateItem(); 
+
+func getNumberOfTakenSlots(): 
+	var sum = 0; 
+	for y in itemGrid.size(): 
+		for x in itemGrid[0].size():
+			if itemGrid[y][x] == 1: 
+				sum += 1; 
+	return sum;  
