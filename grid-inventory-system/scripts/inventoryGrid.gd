@@ -10,8 +10,6 @@ var slotBorderWidth: int = 2;
 var slotData: Array[InventorySlot] = []; 
 var highlightedSlots: Array[InventorySlot] = [];
 
-const GlobalEnums = preload("res://scripts/globalEnums.gd");
-
 @export var slotPrefab: PackedScene; 
 
 var spawnHandler : Node; 
@@ -30,7 +28,6 @@ func setFields(inputHandler: InventoryInputHandler, spawnHandler: InventoryItemS
 	self.inputHandler = inputHandler; 
 	self.spawnHandler = spawnHandler; 
 	self.slotSize = slotSize;
-	print("Slot size in grid: " + str(slotSize));
 	setupInventory(); 
 	
 func _process(delta: float) -> void:
@@ -291,6 +288,7 @@ func highlightSlots(slots: Array[InventorySlot], slotState: GlobalEnums.SlotStat
 func handleSlotHighlights(currentSlot: InventorySlot, currentHeldItem: InventoryItem):
 	var mouseOnGrid = get_global_rect().has_point((get_global_mouse_position()));
 	
+	# all caps scares me
 	if (mouseOnGrid): #IF MOUSE OVER INVENTORY
 		if (currentHeldItem != null && currentSlot != null): #HELD ITEM: -> Hovering with item or going to rotate
 			var newSlots = getPotentialSpace(currentSlot, currentHeldItem);
@@ -330,3 +328,25 @@ func handleSlotHighlights(currentSlot: InventorySlot, currentHeldItem: Inventory
 		if (highlightedSlots.size() > 0 && highlightedSlots != null):
 			unhighlightSlots(highlightedSlots);
 		
+#Finds the first space, going from left to right, top to bottom, 
+#where an item can fit
+func findFirstSpace(spawnItem: InventoryItem):
+	for slot in slotData:
+		var fitSlots = getPotentialSpace(slot, spawnItem);
+		if (checkForFit(spawnItem.itemGrid, fitSlots)):
+			return slot; 
+		else:
+			var currentAngle = 0; 
+			while (currentAngle < 360):
+				print("Rotating to find fit for: " + str(spawnItem));
+				print("Current angle: " + str(currentAngle));
+				spawnItem.rotateToAngle(currentAngle);
+				var tempSlots = getPotentialSpace(slot, spawnItem);
+				if (checkForFit(spawnItem.itemGrid, tempSlots)):
+					return slot; 
+				else: 
+					currentAngle += 90; 
+				
+		
+			
+	return null; 

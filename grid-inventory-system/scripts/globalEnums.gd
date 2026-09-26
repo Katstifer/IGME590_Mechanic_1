@@ -1,5 +1,4 @@
-class_name GlobalEnums
 extends Node
 
+#maybe add autoload to this mama   
 enum SlotState { DEFAULT, EMPTY, TAKEN, HOVERED };
-enum HighlightScenario { SINGLE, SHAPE }

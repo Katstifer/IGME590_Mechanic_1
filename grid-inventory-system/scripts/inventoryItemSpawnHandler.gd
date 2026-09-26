@@ -6,22 +6,24 @@ var itemContainer : Control;
 var inputHandler : InventoryInputHandler; 
 var spawnGrid : InventorySpawnGrid = null; 
 
+var slotSize : int;
+
 var inventoryItemGrids : Array = [];
 
 
-func setFields(prefabs : Array[PackedScene], input: InventoryInputHandler, container : Control, spawnInventory : InventorySpawnGrid): 
+func setFields(prefabs : Array[PackedScene], input: InventoryInputHandler, container : Control, spawnInventory : InventorySpawnGrid, slotSize : int): 
 	inputHandler = input; 
 	inventoryItemPrefabs = prefabs; 
 	itemContainer = container; 
 	spawnGrid = spawnInventory; 
+	self.slotSize = slotSize; 
 	
 	inventoryItemGrids.resize(inventoryItemPrefabs.size())
 	for i in inventoryItemPrefabs.size(): 
 		var tempItem = inventoryItemPrefabs[i].instantiate();
+		tempItem.initItemGrid(slotSize);
 		inventoryItemGrids[i] = tempItem.itemGrid; 
 		tempItem.queue_free();
-		
-	print(inventoryItemGrids);
 		
 	
 
@@ -32,7 +34,8 @@ func spawnItem():
 		return; 
 		
 	var itemIndex = randi_range(0, inventoryItemPrefabs.size() - 1);
-	var newItem = inventoryItemPrefabs[itemIndex].instantiate(); 	
+	var newItem = inventoryItemPrefabs[itemIndex].instantiate(); 
+	newItem.initItemGrid(slotSize); 	
 	
 	#If the spawn grid isn't null
 	if (spawnGrid != null):
@@ -59,11 +62,13 @@ func spawnItem():
 				usedItems.append(inventoryItemPrefabs[index]);	
 					
 				var tempItem = inventoryItemPrefabs[index].instantiate();
+				print(tempItem);
+				tempItem.initItemGrid(slotSize)
 				#If it fits in the space, set the newItem to reference
 				#the temp item and break the loop. 
-				if spawnGrid.findFirstSpace(tempItem) != null:
+				foundSlot = spawnGrid.findFirstSpace(tempItem)
+				if foundSlot != null:
 					newItem = tempItem; 
-					foundSlot = spawnGrid.findFirstSpace(tempItem);
 					spawnSuccess = true; 
 					break;
 				#If the item doesn't fit, delete it.
@@ -84,12 +89,3 @@ func spawnItem():
 		itemContainer.add_child(newItem);
 		newItem.isSelected = true; 
 		inputHandler.currentHeldItem = newItem; 
-
-func onSpawnButtonPressed() -> void:
-	print("Spawn button pressed!");
-	if (inputHandler == null):
-		return; 
-	if (inputHandler.currentHeldItem != null): 
-		return; 
-		
-	spawnItem(); 
